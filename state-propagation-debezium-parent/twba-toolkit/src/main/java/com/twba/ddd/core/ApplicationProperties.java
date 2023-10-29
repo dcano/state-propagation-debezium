@@ -1,6 +1,6 @@
 package com.twba.ddd.core;
 
-import com.twba.kernel.fwk.security.SecurityProperties;
+import com.twba.ddd.security.SecurityProperties;
 import lombok.Getter;
 import lombok.Setter;
 

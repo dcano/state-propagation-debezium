@@ -10,7 +10,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ddd-toolkit</artifactId>
+    <artifactId>twba-toolkit</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -27,7 +27,11 @@
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
-        </dependency>
+        </dependency> 
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>        
     </dependencies>
 
 </project>

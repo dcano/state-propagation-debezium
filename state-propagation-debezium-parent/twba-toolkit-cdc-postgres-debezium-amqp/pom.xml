@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ddd-toolkit-cdc-postgres-debezium-amqp</artifactId>
+    <artifactId>twba-toolkit-cdc-postgres-debezium-amqp</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -20,7 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>com.twba</groupId>
-            <artifactId>ddd-toolkit</artifactId>
+            <artifactId>twba-toolkit</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
