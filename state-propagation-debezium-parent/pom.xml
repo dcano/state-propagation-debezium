@@ -12,6 +12,7 @@
     <modules>
         <module>twba-toolkit</module>
         <module>twba-toolkit-cdc-postgres-debezium-amqp</module>
+        <module>twba-toolkit-outbox-jpa-postgres</module>
     </modules>
 
     <properties>
