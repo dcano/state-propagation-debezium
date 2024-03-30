@@ -1,0 +1,26 @@
+server:
+  port: 9091
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, flyway, info
+debezium:
+  connector-class: "xxxx"
+  custom-props:
+    prop1: "value1"
+  source-database-properties:
+    db-name: "xxx"
+    hostname: "xxx"
+    user: "xxx"
+    password: "xxx"
+    port: "xxx"
+    server-name: "xxx"
+    server-id: "xxx"
+    outbox-table: "xxx"
+    outbox-schema: "xxx"
+  offset-storage:
+    type: "xxx"
+    offset-props:
+      prop1: "value1"

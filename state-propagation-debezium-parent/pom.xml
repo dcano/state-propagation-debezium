@@ -13,19 +13,21 @@
         <module>twba-toolkit</module>
         <module>twba-toolkit-cdc-debezium-postgres</module>
         <module>twba-toolkit-outbox-jpa-postgres</module>
+        <module>twba-state-propagation-debezium-app</module>
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <spring-boot.version>3.1.5</spring-boot.version>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <spring-boot.version>3.2.4</spring-boot.version>
         <hypersistence-utils-hibernate-62.version>3.5.2</hypersistence-utils-hibernate-62.version>
         <testcontainers.version>1.17.6</testcontainers.version>
-        <postgresql.version>42.5.4</postgresql.version>
+        <postgresql.version>42.7.3</postgresql.version>
         <commons-codec.version>1.16.0</commons-codec.version>
-        <debezium.version>2.3.3.Final</debezium.version>
+        <debezium.version>2.5.4.Final</debezium.version>
+        <cloudevents.version>3.0.0</cloudevents.version>
     </properties>
 
     <dependencyManagement>
@@ -33,6 +35,11 @@
             <dependency>
                 <groupId>com.twba</groupId>
                 <artifactId>twba-toolkit</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
+                <artifactId>twba-toolkit-cdc-debezium-postgres</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -84,6 +91,17 @@
                 <artifactId>debezium-connector-postgres</artifactId>
                 <version>${debezium.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.debezium</groupId>
+                <artifactId>debezium-storage-jdbc</artifactId>
+                <version>${debezium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cloudevents</groupId>
+                <artifactId>cloudevents-core</artifactId>
+                <version>${cloudevents.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.glassfish</groupId>
                 <artifactId>jakarta.el</artifactId>

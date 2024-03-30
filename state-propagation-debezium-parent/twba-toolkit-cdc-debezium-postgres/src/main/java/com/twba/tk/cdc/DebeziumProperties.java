@@ -10,7 +10,7 @@ public class DebeziumProperties {
     private String connectorClass;
     private OffsetProperties offsetStorage;
     private SourceDatabaseProperties sourceDatabaseProperties;
-
+    private Map<String, String> customProps;
 
     @Data
     public static class OffsetProperties {
@@ -21,14 +21,14 @@ public class DebeziumProperties {
     @Data
     public static class SourceDatabaseProperties {
         private String hostname;
+        private int port;
         private String user;
         private String password;
         private String dbName;
-        private String includeList;
         private String serverId;
         private String serverName;
-        private String historyType;
-        private Map<String, String> historyProps;
+        private String outboxSchema;
+        private String outboxTable;
 
     }
 }
