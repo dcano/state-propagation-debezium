@@ -9,7 +9,7 @@ public class DebeziumConfigurationProvider {
                 .with("name", "outbox-connector")
                 .with("connector.class", properties.getConnectorClass())
                 .with("offset.storage", properties.getOffsetStorage().getType()), properties.getOffsetStorage())
-                .with("offset.flush.interval.ms", "60000")
+                .with("offset.flush.interval.ms", properties.getOffsetStorage().getFlushInterval())
                 .with("database.hostname", properties.getSourceDatabaseProperties().getHostname())
                 .with("database.port", properties.getSourceDatabaseProperties().getPort())
                 .with("database.user", properties.getSourceDatabaseProperties().getUser())

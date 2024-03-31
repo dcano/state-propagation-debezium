@@ -15,6 +15,7 @@ public class DebeziumProperties {
     @Data
     public static class OffsetProperties {
         private String type;
+        private long flushInterval;
         private Map<String, String> offsetProps;
 
     }

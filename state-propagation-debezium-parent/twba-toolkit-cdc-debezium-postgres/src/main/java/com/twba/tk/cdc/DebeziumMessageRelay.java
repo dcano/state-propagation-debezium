@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -42,9 +43,14 @@ public class DebeziumMessageRelay implements MessageRelay {
     }
 
     @Override
-    public void close() throws Exception {
+    public void stop() throws IOException {
         if (this.debeziumEngine != null) {
             this.debeziumEngine.close();
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        stop();
     }
 }
