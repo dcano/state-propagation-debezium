@@ -8,6 +8,7 @@ services:
       - postgres-db-volume:/var/lib/postgresql/data
     ports:
       - 5432:5432
+    command: ['postgres', '-c', 'wal_level=logical']
   pgadmin:
     image: dpage/pgadmin4
     environment:

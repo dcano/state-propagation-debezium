@@ -6,6 +6,7 @@ import io.debezium.embedded.Connect;
 import io.debezium.engine.DebeziumEngine;
 import io.debezium.engine.RecordChangeEvent;
 import io.debezium.engine.format.ChangeEventFormat;
+import jakarta.validation.constraints.NotNull;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +18,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
 
 public class DebeziumMessageRelay implements MessageRelay {
 
     private static final Logger log = LoggerFactory.getLogger(DebeziumMessageRelay.class);
 
-    private final Executor executor = Executors.newSingleThreadExecutor();
+    private final Executor executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "debezium-message-relay"));
 
     private final MessagePublisher messagePublisher;
     private final DebeziumEngine<RecordChangeEvent<SourceRecord>> debeziumEngine;
@@ -31,20 +34,13 @@ public class DebeziumMessageRelay implements MessageRelay {
         this.debeziumEngine = DebeziumEngine.create(ChangeEventFormat.of(Connect.class))
                 .using(DebeziumConfigurationProvider.outboxConnectorConfig(debeziumProperties).asProperties())
                 .notifying(this::handleChangeEvent)
-                .using(new DebeziumEngine.ConnectorCallback() {
-                    @Override
-                    public void connectorStarted() {
-                        DebeziumEngine.ConnectorCallback.super.connectorStarted();
-                        log.info("Debezium CDC started");
-                    }
-                })
                 .build();
         this.messagePublisher = messagePublisher;
     }
 
     private void handleChangeEvent(RecordChangeEvent<SourceRecord> sourceRecordRecordChangeEvent)  {
         SourceRecord sourceRecord = sourceRecordRecordChangeEvent.record();
-        log.info("Key = '" + sourceRecord.key() + "' value = '" + sourceRecord.value() + "'");
+        log.info("Received record - Key = '" + sourceRecord.key() + "' value = '" + sourceRecord.value() + "'");
         final CloudEvent event;
         try {
             event = new CloudEventBuilder()
@@ -63,6 +59,7 @@ public class DebeziumMessageRelay implements MessageRelay {
     @Override
     public void start() {
         this.executor.execute(debeziumEngine);
+        log.info("Debezium CDC started");
     }
 
     @Override

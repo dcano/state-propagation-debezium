@@ -2,21 +2,28 @@ package com.twba.tk.cdc;
 
 
 import io.cloudevents.CloudEvent;
+import io.debezium.engine.RecordChangeEvent;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.kafka.connect.source.SourceRecord;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -24,6 +31,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -32,15 +40,16 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 public class DebeziumMessageRelayTest {
 
+    private static final Logger log = LoggerFactory.getLogger(DebeziumMessageRelayTest.class);
+
     private DebeziumMessageRelay debeziumMessageRelay;
+    private static Map<String, String> debeziumOffsetStorageProps;
 
-    private static final Map<String, String> debeziumCustomProps;
+    private static Map<String, String> debeziumCustomProps;
 
-    static {
-        debeziumCustomProps = new HashMap<>();
-        debeziumCustomProps.put("topic.prefix", "embedded-debezium");
-        debeziumCustomProps.put("debezium.source.plugin.name", "pgoutput");
-    }
+    @TempDir
+    private static Path offsetPath;
+
     @Mock
     public MessagePublisher messagePublisher;
 
@@ -50,9 +59,30 @@ public class DebeziumMessageRelayTest {
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
             .withDatabaseName("test_db")
-            .withUsername("sa")
-            .withPassword("sa");
+            .withUsername("postgres")
+            .withPassword("postgres")
+            .withCommand("postgres -c wal_level=logical");
 
+
+    @BeforeAll
+    static void bootstrap() throws IOException {
+
+        final Path offsetStorageTempFile = Files.createFile(offsetPath.resolve("offsets_.dat"));
+        final Path historyTempFile = Files.createFile(offsetPath.resolve("history_.dat"));
+        debeziumOffsetStorageProps = new HashMap<>();
+        debeziumOffsetStorageProps.put("offset.storage.file.filename", offsetStorageTempFile.toString());
+
+        debeziumOffsetStorageProps.put("database.history", "io.debezium.relational.history.FileDatabaseHistory");
+        debeziumOffsetStorageProps.put("database.history.file.filename", historyTempFile.toString());
+
+        log.info("Offset storage file location ["+ debeziumOffsetStorageProps.get("offset.storage.file.filename")+"]");
+
+
+        debeziumCustomProps = new HashMap<>();
+        debeziumCustomProps.put("topic.prefix", "embedded-debezium");
+        debeziumCustomProps.put("debezium.source.plugin.name", "pgoutput");
+        debeziumCustomProps.put("plugin.name", "pgoutput");
+    }
 
     @BeforeEach
     void setUp() {
@@ -77,19 +107,20 @@ public class DebeziumMessageRelayTest {
     @Test
     public void whenAddingRecordsThenCDC() throws InterruptedException, IOException {
         debeziumMessageRelay.start();
-        Map<String, String> record = addRandomRecord();
-        Thread.sleep(10000);
+        log.info("Adding record");
+        Map<String, String> record = addRandomRecord(); //TODO assert stuff against the "record"
+        log.info("Record added, waiting");
+        Thread.sleep(2000);
         verify(messagePublisher).publish(eventDispatchedCaptor.capture());
         CloudEvent dispatchedMessage = eventDispatchedCaptor.getValue();
         assertNotNull(dispatchedMessage);
-        debeziumMessageRelay.stop();
     }
 
     private Map<String, String> addRandomRecord() {
         Map<String, String> record = new HashMap<>();
         record.put("uuid", UUID.randomUUID().toString());
-        record.put("column1", RandomStringUtils.random(10));
-        record.put("column2", RandomStringUtils.random(10));
+        record.put("column1", RandomStringUtils.randomAlphabetic(10));
+        record.put("column2", RandomStringUtils.randomAlphabetic(10));
         try (Connection conn = getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
              PreparedStatement pst = conn.prepareStatement("insert into test_schema.test_table(uuid, column1, column2) values(?, ?, ?)")) {
             pst.setString(1, record.get("uuid"));
@@ -140,8 +171,7 @@ public class DebeziumMessageRelayTest {
         sourceDatabaseProperties.setDbName(postgres.getDatabaseName());
         sourceDatabaseProperties.setServerId(UUID.randomUUID().toString());
         sourceDatabaseProperties.setServerName("debezium-embedded-test");
-        sourceDatabaseProperties.setOutboxSchema("test_schema");
-        sourceDatabaseProperties.setOutboxTable("test_table");
+        sourceDatabaseProperties.setOutboxTable("test_schema.test_table");
         return sourceDatabaseProperties;
     }
 
@@ -150,7 +180,7 @@ public class DebeziumMessageRelayTest {
         DebeziumProperties.OffsetProperties offsetProperties = new DebeziumProperties.OffsetProperties();
         offsetProperties.setType("org.apache.kafka.connect.storage.FileOffsetBackingStore");
         offsetProperties.setFlushInterval(5000);
-        offsetProperties.setOffsetProps(new HashMap<>());
+        offsetProperties.setOffsetProps(debeziumOffsetStorageProps);
         return offsetProperties;
     }
 

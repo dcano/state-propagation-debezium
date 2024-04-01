@@ -15,14 +15,12 @@ public class DebeziumConfigurationProvider {
                 .with("database.user", properties.getSourceDatabaseProperties().getUser())
                 .with("database.password", properties.getSourceDatabaseProperties().getPassword())
                 .with("database.dbname", properties.getSourceDatabaseProperties().getDbName()), properties)
-                .with("database.include.list", properties.getSourceDatabaseProperties().getDbName())
                 .with("database.server.id", properties.getSourceDatabaseProperties().getServerId())
                 .with("database.server.name", properties.getSourceDatabaseProperties().getServerName())
+                .with("skipped.operations", "u,d,t")
                 .with("include.schema.changes", "false")
-                .with("schema.include.list", properties.getSourceDatabaseProperties().getOutboxSchema())
                 .with("table.include.list", properties.getSourceDatabaseProperties().getOutboxTable())
-                //.with("topic.prefix", "embedded-debezium") //This should be a custom property
-                //.with("debezium.source.plugin.name", "pgoutput") //This should be a custom property
+                .with("snapshot.include.collection.list", properties.getSourceDatabaseProperties().getOutboxTable())
                 .build();
     }
 
