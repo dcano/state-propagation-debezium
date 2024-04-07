@@ -14,6 +14,12 @@
         <module>twba-toolkit-cdc-debezium-postgres</module>
         <module>twba-toolkit-outbox-jpa-postgres</module>
         <module>twba-state-propagation-debezium-app</module>
+        <module>twba-course-management-domain</module>
+        <module>twba-course-management-application</module>
+        <module>twba-course-management-runtime</module>
+        <module>twba-rating-system-domain</module>
+        <module>twba-rating-system-application</module>
+        <module>twba-rating-system-runtime</module>
     </modules>
 
     <properties>
@@ -40,6 +46,26 @@
             <dependency>
                 <groupId>com.twba</groupId>
                 <artifactId>twba-toolkit-cdc-debezium-postgres</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
+                <artifactId>twba-course-management-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
+                <artifactId>twba-rating-system-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
+                <artifactId>twba-rating-system-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
+                <artifactId>twba-course-management-application</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -8,9 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Created by canod on 18/07/2017.
- */
 public abstract class Entity extends ModelValidator implements ConcurrencyAware {
     @NotNull
     @Valid
@@ -28,15 +25,15 @@ public abstract class Entity extends ModelValidator implements ConcurrencyAware 
         return version;
     }
 
-    protected void publishEvent(Event<? extends DomainEventPayload> event) {
+    protected void record(Event<? extends DomainEventPayload> event) {
         event.setAggregateType(aggregateType());
         event.setAggregateId(aggregateId());
         event.setEventStreamVersion(Objects.isNull(version)?0:version + events.size());
         this.events.add(event);
     }
 
-    protected void publishEvent(DomainEventPayload event) {
-        publishEvent(new Event<>(event));
+    protected void record(DomainEventPayload event) {
+        record(new Event<>(event));
     }
 
     public boolean hasEvents(){
