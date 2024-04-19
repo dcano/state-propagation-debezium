@@ -96,7 +96,7 @@ public class CourseDefinition extends MultiTenantEntity {
         CourseDefinition createNew() {
             //new instance, generate domain event
             CourseDefinition courseDefinition = new CourseDefinition(tenantId, 0L, id, courseDescription, courseObjective, preRequirements, duration, teacherId, courseDates, courseStatus);
-            var courseDefinitionCreatedEvent = new CourseDefinitionCreatedEvent(tenantId);
+            var courseDefinitionCreatedEvent = CourseDefinitionCreatedEvent.triggeredFrom(courseDefinition);
             courseDefinition.record(courseDefinitionCreatedEvent);
             return courseDefinition;
         }

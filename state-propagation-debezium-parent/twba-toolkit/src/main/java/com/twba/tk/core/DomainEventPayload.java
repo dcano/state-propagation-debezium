@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-public abstract class DomainEventPayload {
+public abstract class DomainEventPayload implements Partitionable {
 
     /**
      * When the event was created in UIC

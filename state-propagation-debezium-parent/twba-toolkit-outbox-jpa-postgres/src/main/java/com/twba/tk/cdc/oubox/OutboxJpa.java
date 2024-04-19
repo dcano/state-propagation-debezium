@@ -34,7 +34,7 @@ public class OutboxJpa implements Outbox {
 
     private OutboxMessageEntity toJpa(OutboxMessage outboxMessage) {
         OutboxMessageEntity outboxMessageEntity = new OutboxMessageEntity();
-        outboxMessageEntity.setMetadata(outboxMessage.metadata());
+        outboxMessageEntity.setMetadata(outboxMessage.header());
         outboxMessageEntity.setUuid(outboxMessage.uuid());
         outboxMessageEntity.setType(outboxMessage.type());
         outboxMessageEntity.setPartitionKey(outboxMessage.partitionKey());

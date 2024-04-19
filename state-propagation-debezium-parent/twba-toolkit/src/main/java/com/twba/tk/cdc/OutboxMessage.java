@@ -1,7 +1,7 @@
 package com.twba.tk.cdc;
 
 public record OutboxMessage(String uuid,
-                            String metadata,
+                            String header,
                             String payload,
                             String type,
                             long epoch,
