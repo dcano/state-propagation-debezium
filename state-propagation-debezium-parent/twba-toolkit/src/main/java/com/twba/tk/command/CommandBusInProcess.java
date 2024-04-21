@@ -21,7 +21,7 @@ public class CommandBusInProcess implements CommandBus {
         this.domainEventAppender = domainEventAppender;
         handlersMap = new HashMap<>();
         if(commandHandlers != null) {
-            commandHandlers.forEach(handler -> handlersMap.put(handler.handles().getName(), decorate(handler)));
+            commandHandlers.forEach(handler -> handlersMap.put(handler.handles(), decorate(handler)));
         }
 
     }

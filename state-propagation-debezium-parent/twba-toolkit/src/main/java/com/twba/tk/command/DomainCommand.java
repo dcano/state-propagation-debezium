@@ -4,6 +4,6 @@ import java.time.Instant;
 
 public interface  DomainCommand {
     String commandUid();
-    Instant occurredOn();
+    Instant occurredAt();
     String commandName();
 }

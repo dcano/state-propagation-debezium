@@ -18,7 +18,6 @@ public class CourseDefinition extends MultiTenantEntity {
     private CourseDates courseDates;
     private CourseStatus courseStatus;
 
-
     private CourseDefinition(TenantId tenantId, long version, CourseId id, CourseDescription courseDescription, CourseObjective courseObjective, List<PreRequirement> preRequirements, CourseDuration duration, TeacherId teacherId, CourseDates courseDates, CourseStatus courseStatus) {
         super(tenantId, version);
         this.id = id;
@@ -34,6 +33,10 @@ public class CourseDefinition extends MultiTenantEntity {
     @Override
     public String aggregateId() {
         return id.value();
+    }
+
+    static CourseDefinitionBuilder builder(TenantId tenantId) {
+        return new CourseDefinitionBuilder(tenantId);
     }
 
     static class CourseDefinitionBuilder {
@@ -52,50 +55,50 @@ public class CourseDefinition extends MultiTenantEntity {
             this.tenantId = tenantId;
         }
 
-        CourseDefinitionBuilder id(CourseId id) {
+        CourseDefinitionBuilder withCourseId(CourseId id) {
             this.id = id;
             return this;
         }
-        CourseDefinitionBuilder courseDescription(CourseDescription courseDescription) {
+        CourseDefinitionBuilder withCourseDescription(CourseDescription courseDescription) {
             this.courseDescription = courseDescription;
             return this;
         }
-        CourseDefinitionBuilder courseObjective(CourseObjective courseObjective) {
+        CourseDefinitionBuilder withCourseObjective(CourseObjective courseObjective) {
             this.courseObjective = courseObjective;
             return this;
         }
-        CourseDefinitionBuilder preRequirements(List<PreRequirement> preRequirements) {
+        CourseDefinitionBuilder withPreRequirements(List<PreRequirement> preRequirements) {
             this.preRequirements = preRequirements;
             return this;
         }
-        CourseDefinitionBuilder duration(CourseDuration duration) {
+        CourseDefinitionBuilder withDuration(CourseDuration duration) {
             this.duration = duration;
             return this;
         }
-        CourseDefinitionBuilder teacherId(TeacherId teacherId) {
+        CourseDefinitionBuilder withTeacherId(TeacherId teacherId) {
             this.teacherId = teacherId;
             return this;
         }
-        CourseDefinitionBuilder courseDates(CourseDates courseDates) {
+        CourseDefinitionBuilder withCourseDates(CourseDates courseDates) {
             this.courseDates = courseDates;
             return this;
         }
-        CourseDefinitionBuilder courseStatus(CourseStatus courseStatus) {
+        CourseDefinitionBuilder withCourseStatus(CourseStatus courseStatus) {
             this.courseStatus = courseStatus;
             return this;
         }
-        CourseDefinitionBuilder version(long version) {
+        CourseDefinitionBuilder withVersion(long version) {
             this.version = version;
             return this;
         }
-        CourseDefinitionBuilder tenantId(TenantId tenantId) {
+        CourseDefinitionBuilder withTenantId(TenantId tenantId) {
             this.tenantId = tenantId;
             return this;
         }
 
         CourseDefinition createNew() {
             //new instance, generate domain event
-            CourseDefinition courseDefinition = new CourseDefinition(tenantId, 0L, id, courseDescription, courseObjective, preRequirements, duration, teacherId, courseDates, courseStatus);
+            CourseDefinition courseDefinition = new CourseDefinition(tenantId, 0L, id, courseDescription, courseObjective, preRequirements, duration, teacherId, courseDates, CourseStatus.PENDING_TO_REVIEW);
             var courseDefinitionCreatedEvent = CourseDefinitionCreatedEvent.triggeredFrom(courseDefinition);
             courseDefinition.record(courseDefinitionCreatedEvent);
             return courseDefinition;

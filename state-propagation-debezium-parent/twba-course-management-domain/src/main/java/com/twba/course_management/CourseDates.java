@@ -3,7 +3,7 @@ package com.twba.course_management;
 import java.time.Instant;
 import java.util.Objects;
 
-public record CourseDates(Instant publicationDate, Instant startDate, Instant endDate, Instant finishEnrollmentDate) {
+public record CourseDates(Instant publicationDate, Instant openingDate) {
 
     public CourseDates {
         if(Objects.isNull(publicationDate)) {

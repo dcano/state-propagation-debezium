@@ -2,11 +2,13 @@ package com.twba.tk.core;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 
 /**
  * Created by alonsotd on 10/10/2017.
  */
 
+@Getter
 public abstract class MultiTenantEntity extends Entity {
 
     @NotNull(message = "lblTenantIdNotNull")
@@ -19,7 +21,4 @@ public abstract class MultiTenantEntity extends Entity {
         this.validateProperty("tenantId");
     }
 
-    public TenantId getTenantId() {
-        return tenantId;
-    }
 }

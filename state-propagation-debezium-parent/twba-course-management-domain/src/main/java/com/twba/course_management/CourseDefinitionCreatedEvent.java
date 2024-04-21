@@ -2,14 +2,16 @@ package com.twba.course_management;
 
 import com.twba.tk.core.DomainEventPayload;
 import com.twba.tk.core.TenantId;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+@Getter
 public class CourseDefinitionCreatedEvent extends DomainEventPayload {
 
-    private final String id;
+    private final String courseId;
     private final CourseDescription courseDescription;
     private final CourseObjective courseObjective;
     private final List<PreRequirement> preRequirements;
@@ -18,13 +20,13 @@ public class CourseDefinitionCreatedEvent extends DomainEventPayload {
     private final CourseDates courseDates;
     private final String courseStatus;
 
-    public CourseDefinitionCreatedEvent(TenantId tenantId, CourseId id, CourseDescription courseDescription, CourseObjective courseObjective, List<PreRequirement> preRequirements, CourseDuration duration, TeacherId teacherId, CourseDates courseDates, CourseStatus courseStatus) {
-        this(Instant.now(), UUID.randomUUID().toString(), tenantId, id, courseDescription, courseObjective, preRequirements, duration, teacherId, courseDates, courseStatus);
+    public CourseDefinitionCreatedEvent(TenantId tenantId, CourseId courseId, CourseDescription courseDescription, CourseObjective courseObjective, List<PreRequirement> preRequirements, CourseDuration duration, TeacherId teacherId, CourseDates courseDates, CourseStatus courseStatus) {
+        this(Instant.now(), UUID.randomUUID().toString(), tenantId, courseId, courseDescription, courseObjective, preRequirements, duration, teacherId, courseDates, courseStatus);
     }
 
-    public CourseDefinitionCreatedEvent(Instant occurredOn, String eventUid, TenantId tenantId, CourseId id, CourseDescription courseDescription, CourseObjective courseObjective, List<PreRequirement> preRequirements, CourseDuration duration, TeacherId teacherId, CourseDates courseDates, CourseStatus courseStatus) {
-        super(occurredOn, eventUid, tenantId.getId());
-        this.id = id.value();
+    public CourseDefinitionCreatedEvent(Instant occurredOn, String eventUid, TenantId tenantId, CourseId courseId, CourseDescription courseDescription, CourseObjective courseObjective, List<PreRequirement> preRequirements, CourseDuration duration, TeacherId teacherId, CourseDates courseDates, CourseStatus courseStatus) {
+        super(occurredOn, eventUid, tenantId.value());
+        this.courseId = courseId.value();
         this.courseDescription = courseDescription;
         this.courseObjective = courseObjective;
         this.preRequirements = preRequirements;
@@ -44,5 +46,10 @@ public class CourseDefinitionCreatedEvent extends DomainEventPayload {
                 courseDefinition.getTeacherId(),
                 courseDefinition.getCourseDates(),
                 courseDefinition.getCourseStatus());
+    }
+
+    @Override
+    public String partitionKey() {
+        return courseId;
     }
 }

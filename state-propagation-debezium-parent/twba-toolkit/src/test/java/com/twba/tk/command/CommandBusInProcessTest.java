@@ -1,12 +1,12 @@
 package com.twba.tk.command;
 
 import com.twba.tk.core.DomainEventAppender;
+import lombok.Getter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
 import java.util.Collections;
 
 import static org.mockito.Mockito.verify;
@@ -23,8 +23,8 @@ public class CommandBusInProcessTest {
 
     @Test
     public void shouldExecuteCommands() {
-        when(commandHandler.handles()).thenReturn(MyCommand.class);
-        MyCommand command = new MyCommand();
+        MyCommand command = new MyCommand("testProp");
+        when(commandHandler.handles()).thenReturn(command.commandName());
         CommandBusInProcess commandBusInProcess = new CommandBusInProcess(Collections.singletonList(commandHandler), domainEventAppender);
         commandBusInProcess.push(command);
         verify(commandHandler).handle(command);
@@ -32,21 +32,13 @@ public class CommandBusInProcessTest {
     }
 
 
-    public static class MyCommand implements DomainCommand {
+    @Getter
+    public static class MyCommand extends DefaultDomainCommand {
 
-        @Override
-        public String commandUid() {
-            return "testCommandId";
-        }
+        private final String propertyTest;
 
-        @Override
-        public Instant occurredOn() {
-            return Instant.MAX;
-        }
-
-        @Override
-        public String commandName() {
-            return "testCommandName";
+        public MyCommand(String propertyTest) {
+            this.propertyTest = propertyTest;
         }
     }
 
