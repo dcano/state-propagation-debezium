@@ -20,6 +20,7 @@
         <module>twba-rating-system-domain</module>
         <module>twba-rating-system-application</module>
         <module>twba-rating-system-runtime</module>
+        <module>twba-course-management-repository-jpa</module>
     </modules>
 
     <properties>
@@ -28,7 +29,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <spring-boot.version>3.2.5</spring-boot.version>
-        <hypersistence-utils-hibernate-62.version>3.5.2</hypersistence-utils-hibernate-62.version>
+        <hypersistence-utils-hibernate-62.version>3.7.4</hypersistence-utils-hibernate-62.version>
         <testcontainers.version>1.17.6</testcontainers.version>
         <postgresql.version>42.7.3</postgresql.version>
         <commons-codec.version>1.16.0</commons-codec.version>
@@ -52,6 +53,11 @@
             <dependency>
                 <groupId>com.twba</groupId>
                 <artifactId>twba-course-management-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
+                <artifactId>twba-course-management-repository-jpa</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
