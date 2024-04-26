@@ -32,6 +32,4 @@ public class CourseDefinitionJpa {
     @Version
     private Long version;
 
-    //Instant publicationDate, Instant openingDate
-
 }

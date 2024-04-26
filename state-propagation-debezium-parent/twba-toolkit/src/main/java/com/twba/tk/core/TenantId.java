@@ -9,6 +9,9 @@ public record TenantId(String value) {
             throw new IllegalArgumentException("Tenant Id cannot be null");
         }
     }
+    public static TenantId of(String value) {
+        return new TenantId(value);
+    }
 }
 
 

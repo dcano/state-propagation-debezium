@@ -21,6 +21,8 @@
         <module>twba-rating-system-application</module>
         <module>twba-rating-system-runtime</module>
         <module>twba-course-management-repository-jpa</module>
+        <module>twba-course-management-repository-test</module>
+        <module>twba-course-management-repository-jpa-postgres</module>
     </modules>
 
     <properties>

@@ -10,4 +10,8 @@ public record CourseDescription(CourseTitle title, String summary, String descri
         }
     }
 
+    public static CourseDescription from(CourseTitle title, String summary, String description) {
+        return new CourseDescription(title, summary, description);
+    }
+
 }

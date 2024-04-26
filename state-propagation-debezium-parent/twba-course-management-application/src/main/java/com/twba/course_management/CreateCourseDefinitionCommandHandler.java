@@ -28,7 +28,7 @@ public class CreateCourseDefinitionCommandHandler implements CommandHandler<Crea
                     .createNew());
         }
         else {
-            throw new IllegalStateException("Course definition with title " + command.getCourseDescription().title() + " already exists");
+            throw new IllegalStateException("Course definition with value " + command.getCourseDescription().title() + " already exists");
         }
     }
 }

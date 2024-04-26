@@ -11,4 +11,8 @@ public record CourseDates(Instant publicationDate, Instant openingDate) {
         }
     }
 
+    public static CourseDates of(Instant publicationDate, Instant openingDate) {
+        return new CourseDates(publicationDate, openingDate);
+    }
+
 }

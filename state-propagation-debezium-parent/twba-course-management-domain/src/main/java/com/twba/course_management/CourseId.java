@@ -10,4 +10,8 @@ public record CourseId(String value) {
         }
     }
 
+    public static CourseId of(String value) {
+        return new CourseId(value);
+    }
+
 }

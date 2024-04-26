@@ -10,4 +10,8 @@ public record TeacherId(String value) {
         }
     }
 
+    public static TeacherId from(String value) {
+        return new TeacherId(value);
+    }
+
 }
