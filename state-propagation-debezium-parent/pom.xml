@@ -32,7 +32,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <spring-boot.version>3.2.5</spring-boot.version>
         <hypersistence-utils-hibernate-62.version>3.7.4</hypersistence-utils-hibernate-62.version>
-        <testcontainers.version>1.17.6</testcontainers.version>
+        <testcontainers.version>1.19.7</testcontainers.version>
         <postgresql.version>42.7.3</postgresql.version>
         <commons-codec.version>1.16.0</commons-codec.version>
         <debezium.version>2.5.4.Final</debezium.version>
@@ -76,6 +76,12 @@
                 <groupId>com.twba</groupId>
                 <artifactId>twba-course-management-application</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
+                <artifactId>twba-course-management-repository-test</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>jakarta.inject</groupId>

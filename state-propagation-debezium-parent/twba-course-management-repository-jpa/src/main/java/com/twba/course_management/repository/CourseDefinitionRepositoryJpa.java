@@ -25,6 +25,9 @@ public class CourseDefinitionRepositoryJpa implements CourseDefinitionRepository
 
     @Override
     public CourseDefinition save(CourseDefinition courseDefinition) {
+        if(Objects.isNull(courseDefinition)) {
+            return null;
+        }
         CourseDefinitionJpa courseDefinitionJpa = toJpa(courseDefinition);
         return toDomain(helper.save(courseDefinitionJpa));
     }
@@ -49,9 +52,6 @@ public class CourseDefinitionRepositoryJpa implements CourseDefinitionRepository
     }
 
     private CourseDefinitionJpa toJpa(CourseDefinition courseDefinition) {
-        if(Objects.isNull(courseDefinition)){
-            return null;
-        }
         CourseDefinitionJpa courseDefinitionJpa = new CourseDefinitionJpa();
         CourseDurationJpa courseDurationJpa = new CourseDurationJpa();
         courseDurationJpa.setExpectedDurationMillis(courseDefinition.getDuration().expectedDurationMillis());

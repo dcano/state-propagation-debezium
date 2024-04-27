@@ -1,7 +1,6 @@
 package com.twba.tk.cdc.outbox;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twba.tk.cdc.OutboxMessage;
 import com.twba.tk.cdc.OutboxProperties;
 import com.twba.tk.cdc.oubox.OutboxJpa;
@@ -14,11 +13,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import static com.twba.tk.cdc.outbox.OutboxMessages.randomOutboxMessage;
 import static org.junit.jupiter.api.Assertions.*;
