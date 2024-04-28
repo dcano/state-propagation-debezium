@@ -27,4 +27,5 @@ public class OutboxMessageEntity {
     long epoch;
     String partitionKey;
     int partition;
+    String tenantId;
 }

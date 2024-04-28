@@ -48,7 +48,7 @@ public class DomainEventAppender {
         try {
             String header = objectMapper.writeValueAsString(event.header());
             String payload = objectMapper.writeValueAsString(event.getPayload());
-            return new OutboxMessage(event.getId(), header, payload, event.eventType(), Instant.now().toEpochMilli(), event.partitionKey());
+            return new OutboxMessage(event.getId(), header, payload, event.eventType(), Instant.now().toEpochMilli(), event.partitionKey(), event.getTenantId());
         }
         catch (JsonProcessingException e) {
             throw new UnableToSerializeEventException(event.getPayload().getClass(), e);

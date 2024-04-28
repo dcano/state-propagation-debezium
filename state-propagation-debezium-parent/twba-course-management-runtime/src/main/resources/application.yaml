@@ -1,0 +1,31 @@
+server:
+  port: 9095
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, flyway, info
+
+spring:
+  application:
+    name: "course-management-service"
+  datasource:
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 8
+      pool-name: "lazulli-pool"
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 0
+    schemas: db_migrations
+    out-of-order: true
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+logging:
+  level:
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN

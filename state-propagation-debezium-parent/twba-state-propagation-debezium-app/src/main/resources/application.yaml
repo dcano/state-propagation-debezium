@@ -7,20 +7,24 @@ management:
       exposure:
         include: prometheus, health, flyway, info
 debezium:
-  connector-class: "xxxx"
+  connector-class: "io.debezium.connector.postgresql.PostgresConnector"
   custom-props:
-    prop1: "value1"
+    "[topic.prefix]": "embedded-debezium"
+    "[debezium.source.plugin.name]": "pgoutput"
+    "[plugin.name]": "pgoutput"
   source-database-properties:
-    db-name: "xxx"
-    hostname: "xxx"
-    user: "xxx"
-    password: "xxx"
-    port: "xxx"
-    server-name: "xxx"
-    server-id: "xxx"
-    outbox-table: "xxx"
-    outbox-schema: "xxx"
+    db-name: "${CDC_DB_NAME}"
+    hostname: "${CDC_HOST}"
+    user: ${CDC_DB_USER}"
+    password: ${CDC_DB_PASSWORD}"
+    port: 5432
+    server-name: "debezium-message-relay"
+    server-id: "debezium-message-relay-1"
+    outbox-table: "outbox_schema.outbox"
+    outbox-schema: ""
   offset-storage:
-    type: "xxx"
+    type: "org.apache.kafka.connect.storage.MemoryOffsetBackingStore"
+    flush-interval: 3000
     offset-props:
-      prop1: "value1"
+      "[offset.flush.timeout.ms]": 1000
+      "[max.poll.records]": 1000

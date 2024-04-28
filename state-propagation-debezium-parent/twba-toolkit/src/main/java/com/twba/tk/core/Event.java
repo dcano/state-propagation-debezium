@@ -96,6 +96,11 @@ public final class Event<T extends DomainEventPayload> implements Versionable, T
         return (Long)header.get(EVENT_STREAM_VERSION);
     }
 
+    public String getTenantId() {
+        return payload.getTenantId();
+    }
+
+
     String eventType() {
         return getRoutingKey().toString();
     }

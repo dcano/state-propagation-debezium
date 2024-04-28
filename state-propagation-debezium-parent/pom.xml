@@ -23,6 +23,7 @@
         <module>twba-course-management-repository-jpa</module>
         <module>twba-course-management-repository-test</module>
         <module>twba-course-management-repository-jpa-postgres</module>
+        <module>twba-toolkit-message-publisher-rabbitmq</module>
     </modules>
 
     <properties>
@@ -64,6 +65,11 @@
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
+                <artifactId>twba-course-management-repository-jpa-postgres</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
                 <artifactId>twba-rating-system-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -75,6 +81,11 @@
             <dependency>
                 <groupId>com.twba</groupId>
                 <artifactId>twba-course-management-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
+                <artifactId>twba-toolkit-message-publisher-rabbitmq</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

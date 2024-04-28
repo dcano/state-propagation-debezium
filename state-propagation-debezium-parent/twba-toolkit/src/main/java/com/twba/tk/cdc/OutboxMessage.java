@@ -5,5 +5,6 @@ public record OutboxMessage(String uuid,
                             String payload,
                             String type,
                             long epoch,
-                            String partitionKey) {
+                            String partitionKey,
+                            String tenantId) {
 }
