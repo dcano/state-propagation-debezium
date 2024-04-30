@@ -7,8 +7,11 @@ create table outbox_schema.outbox (
     payload jsonb not null,
     type varchar(1000) not null,
     tenant_id varchar(255),
-    epoch long not null,
+    epoch int8 not null,
     partition_key varchar(1000),
     partition int4 not null,
     primary key (uuid)
 );
+
+create index idx_outbox_type on outbox_schema.outbox (type);
+create index idx_outbox_epoch on outbox_schema.outbox (epoch);

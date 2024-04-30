@@ -12,8 +12,8 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(schema="outbox_schema", name = "outbox",
         indexes = {
-                @Index(name = "type", columnList = "type"),
-                @Index(name = "epoch", columnList = "epoch")
+                @Index(name = "idx_outbox_type", columnList = "type"),
+                @Index(name = "idx_outbox_epoch", columnList = "epoch")
         })
 public class OutboxMessageEntity {
 

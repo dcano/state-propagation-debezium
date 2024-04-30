@@ -26,6 +26,7 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.twba</groupId>
             <artifactId>twba-course-management-repository-test</artifactId>

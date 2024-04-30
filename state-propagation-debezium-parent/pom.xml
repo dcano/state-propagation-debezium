@@ -90,6 +90,11 @@
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
+                <artifactId>twba-toolkit-outbox-jpa-postgres</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
                 <artifactId>twba-course-management-repository-test</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
@@ -172,5 +177,22 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>

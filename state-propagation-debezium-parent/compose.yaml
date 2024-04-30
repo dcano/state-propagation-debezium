@@ -18,6 +18,16 @@ services:
       - 16543:80
     volumes:
       - ./pgadmin-servers.json:/pgadmin4/servers.json
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
 volumes:
   postgres-db-volume:
     driver: local
@@ -25,3 +35,9 @@ volumes:
       type: none
       o: bind
       device: ./temp/data
+  rabbitmq-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./temp/rabbitmq

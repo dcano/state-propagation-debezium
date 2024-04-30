@@ -16,8 +16,8 @@ public class DebeziumConfiguration {
     }
 
     @Bean
-    public MessagePublisher messagePublisher() {
-        return new MessagePublisherRabbitMq();
+    public MessagePublisher messagePublisher(@Autowired MessageRelayProps messageRelayProps) {
+        return new MessagePublisherRabbitMq(messageRelayProps);
     }
 
     @Bean
@@ -26,5 +26,9 @@ public class DebeziumConfiguration {
         return new DebeziumMessageRelay(messagePublisher, debeziumProperties);
     }
 
-
+    @Bean
+    @ConfigurationProperties(prefix = "cdc")
+    public MessageRelayProps messageRelayProps() {
+        return new MessageRelayProps();
+    }
 }

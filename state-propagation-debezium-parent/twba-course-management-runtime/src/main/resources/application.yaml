@@ -6,7 +6,6 @@ management:
     web:
       exposure:
         include: prometheus, health, flyway, info
-
 spring:
   application:
     name: "course-management-service"
@@ -15,16 +14,16 @@ spring:
       connection-timeout: 20000
       maximum-pool-size: 8
       pool-name: "lazulli-pool"
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
   flyway:
     baseline-on-migrate: true
     baseline-version: 0
     schemas: db_migrations
     out-of-order: true
     enabled: true
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
 logging:
   level:
     org.hibernate.SQL: WARN
