@@ -28,3 +28,6 @@ logging:
   level:
     org.hibernate.SQL: WARN
     org.hibernate.type.descriptor.sql.BasicBinder: WARN
+
+outbox:
+  num-partitions: 1

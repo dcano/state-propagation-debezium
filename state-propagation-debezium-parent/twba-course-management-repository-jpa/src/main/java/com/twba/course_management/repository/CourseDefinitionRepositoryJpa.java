@@ -4,6 +4,7 @@ import com.twba.course_management.*;
 import com.twba.course_management.repository.db.CourseDefinitionJpa;
 import com.twba.course_management.repository.db.CourseDefinitionJpaHelper;
 import com.twba.course_management.repository.db.CourseDurationJpa;
+import com.twba.tk.core.AppendEvents;
 import com.twba.tk.core.TenantId;
 
 import java.util.Arrays;
@@ -23,6 +24,7 @@ public class CourseDefinitionRepositoryJpa implements CourseDefinitionRepository
         return Objects.nonNull(helper.findCourseDefinitionJpaByTenantIdAndTitle(tenantId.value(), courseTitle.value()));
     }
 
+    @AppendEvents
     @Override
     public CourseDefinition save(CourseDefinition courseDefinition) {
         if(Objects.isNull(courseDefinition)) {
@@ -58,7 +60,7 @@ public class CourseDefinitionRepositoryJpa implements CourseDefinitionRepository
         courseDurationJpa.setNumberOfClasses(courseDefinition.getDuration().numberOfClasses());
         courseDefinitionJpa.setId(courseDefinition.getId().value());
         courseDefinitionJpa.setDuration(courseDurationJpa);
-        courseDefinitionJpa.setDescription(courseDefinitionJpa.getDescription());
+        courseDefinitionJpa.setDescription(courseDefinition.getCourseDescription().description());
         courseDefinitionJpa.setStatus(courseDefinition.getCourseStatus().name());
         courseDefinitionJpa.setTitle(courseDefinition.getCourseDescription().title().value());
         courseDefinitionJpa.setTeacherId(courseDefinition.getTeacherId().value());
@@ -70,6 +72,7 @@ public class CourseDefinitionRepositoryJpa implements CourseDefinitionRepository
                 .stream().map(PreRequirement::requirement)
                 .collect(Collectors.joining("#")):null);
         courseDefinitionJpa.setVersion(courseDefinition.getVersion());
+        courseDefinitionJpa.setSummary(courseDefinition.getCourseDescription().summary());
         return courseDefinitionJpa;
     }
 }

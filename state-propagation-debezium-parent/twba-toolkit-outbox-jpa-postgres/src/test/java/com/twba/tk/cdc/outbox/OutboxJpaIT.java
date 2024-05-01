@@ -3,7 +3,7 @@ package com.twba.tk.cdc.outbox;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.twba.tk.cdc.OutboxMessage;
 import com.twba.tk.cdc.oubox.OutboxJpa;
-import com.twba.tk.cdc.oubox.config.PersistenceConfig;
+import com.twba.tk.cdc.oubox.config.PersistenceConfigOutbox;
 import com.twba.tk.cdc.oubox.jpa.OutboxMessageEntity;
 import com.twba.tk.cdc.oubox.jpa.OutboxMessageRepositoryJpaHelper;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import static com.twba.tk.cdc.outbox.OutboxMessages.randomOutboxMessage;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
-@ContextConfiguration(classes = {PersistenceConfig.class, TestAppConfig.class})
+@ContextConfiguration(classes = {PersistenceConfigOutbox.class, TestAppConfig.class})
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class OutboxJpaIT {

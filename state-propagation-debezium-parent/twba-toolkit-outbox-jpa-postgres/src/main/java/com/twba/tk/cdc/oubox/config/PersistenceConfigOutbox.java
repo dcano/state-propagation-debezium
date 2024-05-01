@@ -11,10 +11,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@ComponentScan(basePackages = {"com.twba.tk"})
-@EntityScan(basePackages = {"com.twba.tk"})
-@EnableJpaRepositories(basePackages = {"com.twba.tk"})
-public class PersistenceConfig {
+@ComponentScan(basePackages = {
+        "com.twba.tk"
+})
+@EntityScan(basePackages = {
+        "com.twba.tk"
+})
+@EnableJpaRepositories(basePackages = {
+        "com.twba.tk"
+})
+public class PersistenceConfigOutbox {
 
     public Outbox outbox(@Autowired OutboxMessageRepositoryJpaHelper helper,
                          @Autowired OutboxProperties outboxProperties) {

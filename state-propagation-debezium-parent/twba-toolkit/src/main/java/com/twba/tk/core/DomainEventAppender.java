@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twba.tk.cdc.Outbox;
 import com.twba.tk.cdc.OutboxMessage;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -14,17 +12,17 @@ import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
-@Named
+
 public class DomainEventAppender {
 
     private final ThreadLocal<List<Event<? extends DomainEventPayload>>> eventsToPublish = new ThreadLocal<>();
     private final Outbox outbox;
     private final ObjectMapper objectMapper;
 
-    @Inject
     public DomainEventAppender(Outbox outbox, ObjectMapper objectMapper) {
         this.outbox = outbox;
         this.objectMapper = objectMapper;
+        resetBuffer();
     }
 
 
@@ -38,7 +36,7 @@ public class DomainEventAppender {
     }
 
     public void publishToOutbox() {
-        if(Objects.nonNull(eventsToPublish.get().stream()) && !eventsToPublish.get().isEmpty()){
+        if(Objects.nonNull(eventsToPublish.get()) && !eventsToPublish.get().isEmpty()){
             eventsToPublish.get().stream().map(this::toOutboxMessage).forEach(outbox::appendMessage);
         }
         resetBuffer();
