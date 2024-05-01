@@ -38,6 +38,9 @@ public class DebeziumMessageRelay implements MessageRelay {
         log.info("Received record - Key = '" + sourceRecord.key() + "' value = '" + sourceRecord.value() + "'");
         final CloudEvent event;
         try {
+            //TODO right mapping to CloudEvent
+            //TODO partition number to determine the number of exchanges, then one instance/thread of the message relay per partition number
+            //TODO outbox table clean up
             event = new CloudEventBuilder()
                     .withId("000")
                     .withType("example.demo")

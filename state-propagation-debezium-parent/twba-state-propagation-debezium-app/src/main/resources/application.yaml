@@ -15,8 +15,8 @@ debezium:
   source-database-properties:
     db-name: "${CDC_DB_NAME}"
     hostname: "${CDC_HOST}"
-    user: ${CDC_DB_USER}"
-    password: ${CDC_DB_PASSWORD}"
+    user: "${CDC_DB_USER}"
+    password: "${CDC_DB_PASSWORD}"
     port: 5432
     server-name: "debezium-message-relay"
     server-id: "debezium-message-relay-1"

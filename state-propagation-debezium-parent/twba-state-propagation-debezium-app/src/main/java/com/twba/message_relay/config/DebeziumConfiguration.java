@@ -1,6 +1,7 @@
 package com.twba.message_relay.config;
 
 import com.twba.tk.cdc.*;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +17,8 @@ public class DebeziumConfiguration {
     }
 
     @Bean
-    public MessagePublisher messagePublisher(@Autowired MessageRelayProps messageRelayProps) {
-        return new MessagePublisherRabbitMq(messageRelayProps);
+    public MessagePublisher messagePublisher(@Autowired MessageRelayProps messageRelayProps, @Autowired RabbitTemplate rabbitTemplate) {
+        return new MessagePublisherRabbitMq(messageRelayProps, rabbitTemplate);
     }
 
     @Bean
