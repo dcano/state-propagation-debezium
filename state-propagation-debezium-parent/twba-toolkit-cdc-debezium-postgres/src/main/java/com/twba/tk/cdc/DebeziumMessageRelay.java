@@ -2,10 +2,12 @@ package com.twba.tk.cdc;
 
 import io.cloudevents.CloudEvent;
 import io.cloudevents.core.v1.CloudEventBuilder;
+import io.debezium.data.Envelope;
 import io.debezium.embedded.Connect;
 import io.debezium.engine.DebeziumEngine;
 import io.debezium.engine.RecordChangeEvent;
 import io.debezium.engine.format.ChangeEventFormat;
+import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+import static io.debezium.data.Envelope.FieldName.*;
 
 public class DebeziumMessageRelay implements MessageRelay {
 
@@ -35,16 +39,27 @@ public class DebeziumMessageRelay implements MessageRelay {
 
     private void handleChangeEvent(RecordChangeEvent<SourceRecord> sourceRecordRecordChangeEvent)  {
         SourceRecord sourceRecord = sourceRecordRecordChangeEvent.record();
+        Struct sourceRecordChangeValue= (Struct) sourceRecord.value();
         log.info("Received record - Key = '" + sourceRecord.key() + "' value = '" + sourceRecord.value() + "'");
         final CloudEvent event;
         try {
-            //TODO right mapping to CloudEvent
             //TODO outbox table clean up
+            Struct struct = (Struct) sourceRecordChangeValue.get(AFTER);
+            String payload = (String)struct.get("payload");
+            String uuid = (String)struct.get("uuid");
+            String type = (String)struct.get("type");
+            String tenantId = (String)struct.get("tenant_id");
+            long epoch = (Long)struct.get("epoch");
+            String partitionKey = (String)struct.get("partition_key");
+
             event = new CloudEventBuilder()
-                    .withId("000")
-                    .withType("example.demo")
+                    .withId(uuid)
+                    .withType(type)
+                    .withExtension("tenantid", tenantId)
+                    .withExtension("eventepochtimestamp", epoch)
+                    .withExtension("partitionkey", partitionKey)
                     .withSource(URI.create("http://thewhiteboardarchitect.com/state-propagation/test"))
-                    .withData("application/json","{'key': 'value`}".getBytes("UTF-8"))
+                    .withData("application/json",payload.getBytes("UTF-8"))
                     .build();
             messagePublisher.publish(event);
         }

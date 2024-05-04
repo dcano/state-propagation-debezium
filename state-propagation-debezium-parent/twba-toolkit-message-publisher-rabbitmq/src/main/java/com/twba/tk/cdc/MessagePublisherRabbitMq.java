@@ -19,6 +19,7 @@ public class MessagePublisherRabbitMq implements MessagePublisher {
     public boolean publish(CloudEvent dispatchedMessage) {
         //TODO proper handling of ACK
         //TODO retries and DLQ
+        //TODO AMQP Cloud Event protocol binding
         rabbitTemplate.convertAndSend(publisherProperties.getExchange(), dispatchedMessage.getType(), Objects.nonNull(dispatchedMessage.getData())?dispatchedMessage.getData().toBytes():new byte[0]);
         return true;
     }
