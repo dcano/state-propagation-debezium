@@ -28,4 +28,6 @@ public class OutboxMessageEntity {
     String partitionKey;
     int partition;
     String tenantId;
+    String correlationId;
+    String source;
 }

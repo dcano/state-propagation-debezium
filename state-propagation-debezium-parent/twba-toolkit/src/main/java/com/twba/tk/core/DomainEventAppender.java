@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twba.tk.cdc.Outbox;
 import com.twba.tk.cdc.OutboxMessage;
+import com.twba.tk.command.DomainCommand;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -18,13 +19,18 @@ public class DomainEventAppender {
     private final ThreadLocal<List<Event<? extends DomainEventPayload>>> eventsToPublish = new ThreadLocal<>();
     private final Outbox outbox;
     private final ObjectMapper objectMapper;
+    private final ApplicationProperties applicationProperties;
 
-    public DomainEventAppender(Outbox outbox, ObjectMapper objectMapper) {
+    public DomainEventAppender(Outbox outbox, ObjectMapper objectMapper, ApplicationProperties applicationProperties) {
         this.outbox = outbox;
         this.objectMapper = objectMapper;
+        this.applicationProperties = applicationProperties;
         resetBuffer();
     }
 
+    public void enrichForCommand(DomainCommand command) {
+        eventsToPublish.get().forEach(e -> e.setSource(command.commandUid()));
+    }
 
     public void append(List<Event<? extends DomainEventPayload>> events) {
         //add the event to the buffer, later this event will be published to other bounded contexts
@@ -32,7 +38,12 @@ public class DomainEventAppender {
             resetBuffer();
         }
         //ensure event is not already in buffer
-        events.stream().filter(this::notInBuffer).forEach(event -> eventsToPublish.get().add(event));
+        events.stream().filter(this::notInBuffer).map(this::addEventSourceMetadata).forEach(event -> eventsToPublish.get().add(event));
+    }
+
+    private Event<? extends DomainEventPayload> addEventSourceMetadata(Event<? extends DomainEventPayload> event) {
+        event.setSource(applicationProperties.getName());
+        return event;
     }
 
     public void publishToOutbox() {
@@ -46,7 +57,7 @@ public class DomainEventAppender {
         try {
             String header = objectMapper.writeValueAsString(event.header());
             String payload = objectMapper.writeValueAsString(event.getPayload());
-            return new OutboxMessage(event.getId(), header, payload, event.eventType(), Instant.now().toEpochMilli(), event.partitionKey(), event.getTenantId());
+            return new OutboxMessage(event.getId(), header, payload, event.eventType(), Instant.now().toEpochMilli(), event.partitionKey(), event.getTenantId(), event.correlationId().value(), event.getSource());
         }
         catch (JsonProcessingException e) {
             throw new UnableToSerializeEventException(event.getPayload().getClass(), e);

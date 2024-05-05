@@ -3,6 +3,7 @@ package com.twba.tk.cdc.outbox;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twba.tk.aspects.DomainEventAppenderConcern;
 import com.twba.tk.cdc.OutboxProperties;
+import com.twba.tk.core.ApplicationProperties;
 import com.twba.tk.core.DomainEventAppender;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -17,6 +18,7 @@ public class TestAppConfig {
         outboxProperties.setNumPartitions(2);
         return outboxProperties;
     }
+
 
     @Bean
     public ObjectMapper objectMapper() {

@@ -12,13 +12,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @ComponentScan(basePackages = {
-        "com.twba.tk"
+        "com.twba.tk.cdc"
 })
 @EntityScan(basePackages = {
-        "com.twba.tk"
+        "com.twba.tk.cdc"
 })
 @EnableJpaRepositories(basePackages = {
-        "com.twba.tk"
+        "com.twba.tk.cdc"
 })
 public class PersistenceConfigOutbox {
 

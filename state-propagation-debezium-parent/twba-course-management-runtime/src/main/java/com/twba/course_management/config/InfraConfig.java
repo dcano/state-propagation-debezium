@@ -13,6 +13,7 @@ import com.twba.tk.command.CommandBus;
 import com.twba.tk.command.CommandBusInProcess;
 import com.twba.tk.command.CommandHandler;
 import com.twba.tk.command.DomainCommand;
+import com.twba.tk.core.ApplicationProperties;
 import com.twba.tk.core.DomainEventAppender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -43,9 +44,17 @@ public class InfraConfig {
         return new OutboxProperties();
     }
 
+    @ConfigurationProperties(prefix = "twba.application")
     @Bean
-    public DomainEventAppender domainEventAppender(@Autowired Outbox outbox, @Autowired ObjectMapper objectMapper) {
-        return new DomainEventAppender(outbox, objectMapper);
+    public ApplicationProperties applicationProperties() {
+        return new ApplicationProperties();
+    }
+
+    @Bean
+    public DomainEventAppender domainEventAppender(@Autowired Outbox outbox,
+                                                   @Autowired ObjectMapper objectMapper,
+                                                   @Autowired ApplicationProperties applicationProperties) {
+        return new DomainEventAppender(outbox, objectMapper, applicationProperties);
     }
 
     @Bean

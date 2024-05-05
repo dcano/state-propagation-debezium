@@ -10,13 +10,14 @@ import java.util.Objects;
 
 public final class Event<T extends DomainEventPayload> implements Versionable, Traceable, Routable {
 
-    private static final String CORRELATION_ID = "__correlation_id";
-    private static final String ROUTING_KEY = "__routing_key";
-    private static final String VERSION = "__version";
-    private static final String AGGREGATE_TYPE = "__aggregate_type";
-    private static final String AGGREGATE_ID = "__aggregate_id";
-    private static final String EVENT_STREAM_VERSION = "__event_stream_version";
-    private static final String PARTITION_KEY = "__partition_key";
+    private static final String CORRELATION_ID = "__correlation_id__";
+    private static final String ROUTING_KEY = "__routing_key__";
+    private static final String VERSION = "__version__";
+    private static final String AGGREGATE_TYPE = "__aggregate_type__";
+    private static final String AGGREGATE_ID = "__aggregate_id__";
+    private static final String EVENT_STREAM_VERSION = "__event_stream_version__";
+    private static final String PARTITION_KEY = "__partition_key__";
+    private static final String SOURCE = "__source__";
     private final Map<String, Object> header;
     @Getter
     private final T payload;
@@ -111,6 +112,14 @@ public final class Event<T extends DomainEventPayload> implements Versionable, T
 
     Map<String, Object> header() {
         return new HashMap<>(header);
+    }
+
+    public void setSource(String source) {
+        header.put(SOURCE, source);
+    }
+
+    public String getSource() {
+        return (String)header.get(SOURCE);
     }
 
     @Override

@@ -6,5 +6,7 @@ public record OutboxMessage(String uuid,
                             String type,
                             long epoch,
                             String partitionKey,
-                            String tenantId) {
+                            String tenantId,
+                            String correlationId,
+                            String source) {
 }

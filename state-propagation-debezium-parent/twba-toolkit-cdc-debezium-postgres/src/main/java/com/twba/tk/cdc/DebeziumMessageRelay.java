@@ -1,5 +1,6 @@
 package com.twba.tk.cdc;
 
+import com.twba.tk.event.TwbaCloudEvent;
 import io.cloudevents.CloudEvent;
 import io.cloudevents.core.v1.CloudEventBuilder;
 import io.debezium.data.Envelope;
@@ -49,19 +50,27 @@ public class DebeziumMessageRelay implements MessageRelay {
             String uuid = (String)struct.get("uuid");
             String type = (String)struct.get("type");
             String tenantId = (String)struct.get("tenant_id");
+            String aggregateId = (String)struct.get("aggregate_id");
             long epoch = (Long)struct.get("epoch");
             String partitionKey = (String)struct.get("partition_key");
+            String source = (String)struct.get("source");
+            String correlationId = (String)struct.get("correlation_id");
 
             event = new CloudEventBuilder()
                     .withId(uuid)
                     .withType(type)
-                    .withExtension("tenantid", tenantId)
-                    .withExtension("eventepochtimestamp", epoch)
-                    .withExtension("partitionkey", partitionKey)
-                    .withSource(URI.create("http://thewhiteboardarchitect.com/state-propagation/test"))
+                    .withSubject(aggregateId)
+                    .withExtension(TwbaCloudEvent.CLOUD_EVENT_TENANT_ID, tenantId)
+                    .withExtension(TwbaCloudEvent.CLOUD_EVENT_TIMESTAMP, epoch)
+                    .withExtension(TwbaCloudEvent.CLOUD_EVENT_PARTITION_KEY, partitionKey)
+                    .withExtension(TwbaCloudEvent.CLOUD_EVENT_CORRELATION_ID, correlationId)
+                    .withExtension(TwbaCloudEvent.CLOUD_EVENT_GENERATING_APP_NAME, source)
+                    .withSource(URI.create("https://thewhiteboardarchitect.com/" + source))
                     .withData("application/json",payload.getBytes("UTF-8"))
                     .build();
+
             messagePublisher.publish(event);
+
         }
         catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);

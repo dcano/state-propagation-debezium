@@ -17,19 +17,13 @@ public class DebeziumConfiguration {
     }
 
     @Bean
-    public MessagePublisher messagePublisher(@Autowired MessageRelayProps messageRelayProps, @Autowired RabbitTemplate rabbitTemplate) {
-        return new MessagePublisherRabbitMq(messageRelayProps, rabbitTemplate);
+    public MessagePublisher messagePublisher(@Autowired RabbitTemplate rabbitTemplate) {
+        return new MessagePublisherRabbitMq(rabbitTemplate);
     }
 
     @Bean
     public MessageRelay debeziumMessageRelay(@Autowired DebeziumProperties debeziumProperties,
                                              @Autowired MessagePublisher messagePublisher) {
         return new DebeziumMessageRelay(messagePublisher, debeziumProperties);
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "cdc")
-    public MessageRelayProps messageRelayProps() {
-        return new MessageRelayProps();
     }
 }

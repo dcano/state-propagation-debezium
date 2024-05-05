@@ -6,6 +6,12 @@ management:
     web:
       exposure:
         include: prometheus, health, flyway, info
+
+twba:
+  application:
+    name: "course-management"
+    uri: "https://thewhiteboardarchitect.com/${twba.application.name}"
+
 spring:
   application:
     name: "course-management-service"
