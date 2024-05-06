@@ -25,6 +25,7 @@
         <module>twba-course-management-repository-jpa-postgres</module>
         <module>twba-toolkit-message-publisher-rabbitmq</module>
         <module>twba-course-management-rest</module>
+        <module>twba-rating-system-amqp-listener</module>
     </modules>
 
     <properties>
@@ -97,6 +98,11 @@
             <dependency>
                 <groupId>com.twba</groupId>
                 <artifactId>twba-toolkit-outbox-jpa-postgres</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
+                <artifactId>twba-rating-system-amqp-listener</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
