@@ -29,7 +29,7 @@ public class DomainEventAppender {
     }
 
     public void enrichForCommand(DomainCommand command) {
-        eventsToPublish.get().forEach(e -> e.setSource(command.commandUid()));
+        eventsToPublish.get().forEach(e -> e.setCorrelationId(CorrelationId.of(command.commandUid())));
     }
 
     public void append(List<Event<? extends DomainEventPayload>> events) {
@@ -57,7 +57,7 @@ public class DomainEventAppender {
         try {
             String header = objectMapper.writeValueAsString(event.header());
             String payload = objectMapper.writeValueAsString(event.getPayload());
-            return new OutboxMessage(event.getId(), header, payload, event.eventType(), Instant.now().toEpochMilli(), event.partitionKey(), event.getTenantId(), event.correlationId().value(), event.getSource());
+            return new OutboxMessage(event.getId(), header, payload, event.eventType(), Instant.now().toEpochMilli(), event.partitionKey(), event.getTenantId(), event.correlationId().value(), event.getSource(), event.getAggregateId());
         }
         catch (JsonProcessingException e) {
             throw new UnableToSerializeEventException(event.getPayload().getClass(), e);

@@ -13,6 +13,7 @@ public class TwbaCloudEvent {
     public static final String CLOUD_EVENT_SUBJECT = "subject";
     public static final String CLOUD_EVENT_CORRELATION_ID = "correlationid";
     public static final String CLOUD_EVENT_GENERATING_APP_NAME = "appname";
+    public static final String CLOUD_EVENT_SOURCE = "source";
 
     private final CloudEvent cloudEvent;
 

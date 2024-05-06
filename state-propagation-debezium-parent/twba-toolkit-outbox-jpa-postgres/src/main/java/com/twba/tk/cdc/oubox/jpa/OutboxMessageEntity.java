@@ -30,4 +30,5 @@ public class OutboxMessageEntity {
     String tenantId;
     String correlationId;
     String source;
+    String aggregateId;
 }

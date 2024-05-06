@@ -8,5 +8,6 @@ public record OutboxMessage(String uuid,
                             String partitionKey,
                             String tenantId,
                             String correlationId,
-                            String source) {
+                            String source,
+                            String aggregateId) {
 }

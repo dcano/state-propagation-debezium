@@ -42,6 +42,9 @@ public class OutboxJpa implements Outbox {
         outboxMessageEntity.setPartition(this.partitionFor(outboxMessage.partitionKey()));
         outboxMessageEntity.setEpoch(outboxMessage.epoch());
         outboxMessageEntity.setTenantId(outboxMessage.tenantId());
+        outboxMessageEntity.setAggregateId(outboxMessage.aggregateId());
+        outboxMessageEntity.setCorrelationId(outboxMessage.correlationId());
+        outboxMessageEntity.setSource(outboxMessage.source());
         return outboxMessageEntity;
     }
 }
