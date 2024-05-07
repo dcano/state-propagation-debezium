@@ -20,11 +20,15 @@
     <dependencies>
         <dependency>
             <groupId>com.twba</groupId>
-            <artifactId>twba-toolkit</artifactId>
+            <artifactId>twba-rating-system-application</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
         </dependency>
     </dependencies>
 

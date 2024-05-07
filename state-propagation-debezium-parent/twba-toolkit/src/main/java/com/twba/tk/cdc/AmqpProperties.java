@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class AmqpProperties {
 
-    public String hostName;
+    public String host;
     private int port;
     private String username;
     private String password;
