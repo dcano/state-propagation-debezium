@@ -28,8 +28,6 @@ public class ListenersOfCourseManagementEvents {
             key = "com.twba.course_management.coursedefinitioncreatedevent")
     )
     public void processOrder(String courseDefinitionJson) {
-        //TODO create command for initialize rating for course
-        //TODO call command bus
         log.info("Message received:::::{}", courseDefinitionJson);
     }
 

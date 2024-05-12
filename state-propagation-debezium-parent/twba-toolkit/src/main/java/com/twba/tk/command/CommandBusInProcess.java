@@ -3,6 +3,7 @@ package com.twba.tk.command;
 import com.twba.tk.command.decorator.PublishBufferedEventsCommandHandlerDecorator;
 import com.twba.tk.command.decorator.TransactionalCommandHandlerDecorator;
 import com.twba.tk.core.DomainEventAppender;
+import com.twba.tk.core.TwbaTransactionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +18,12 @@ public class CommandBusInProcess implements CommandBus {
     private final Map<String, CommandHandler<DomainCommand>> handlersMap;
     private final DomainEventAppender domainEventAppender;
 
-    public CommandBusInProcess(List<CommandHandler<? extends DomainCommand>> commandHandlers, DomainEventAppender domainEventAppender) {
+    public CommandBusInProcess(List<CommandHandler<? extends DomainCommand>> commandHandlers,
+                               DomainEventAppender domainEventAppender, TwbaTransactionManager transactionManager) {
         this.domainEventAppender = domainEventAppender;
         handlersMap = new HashMap<>();
         if(commandHandlers != null) {
-            commandHandlers.forEach(handler -> handlersMap.put(handler.handles(), decorate(handler)));
+            commandHandlers.forEach(handler -> handlersMap.put(handler.handles(), decorate(handler, transactionManager)));
         }
 
     }
@@ -34,7 +36,7 @@ public class CommandBusInProcess implements CommandBus {
         }
     }
 
-    private CommandHandler<DomainCommand> decorate(CommandHandler<? extends  DomainCommand> handler) {
-        return new TransactionalCommandHandlerDecorator(new PublishBufferedEventsCommandHandlerDecorator(handler, domainEventAppender));
+    private CommandHandler<DomainCommand> decorate(CommandHandler<? extends  DomainCommand> handler, TwbaTransactionManager transactionManager) {
+        return new TransactionalCommandHandlerDecorator(new PublishBufferedEventsCommandHandlerDecorator(handler, domainEventAppender), transactionManager);
     }
 }

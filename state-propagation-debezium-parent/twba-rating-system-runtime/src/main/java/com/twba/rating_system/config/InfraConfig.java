@@ -4,6 +4,8 @@ import com.twba.tk.cdc.AmqpProperties;
 import com.twba.tk.command.CommandBus;
 import com.twba.tk.command.CommandBusInProcess;
 import com.twba.tk.core.ApplicationProperties;
+import com.twba.tk.core.TwbaTransactionManager;
+import com.twba.tk.core.tx.TwbaTransactionManagerSpring;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Collections;
 
@@ -20,8 +23,13 @@ import java.util.Collections;
 public class InfraConfig {
 
     @Bean
-    public CommandBus commandBus() {
-        return new CommandBusInProcess(Collections.emptyList(), null);
+    public TwbaTransactionManager twbaTransactionManager(@Autowired PlatformTransactionManager platformTransactionManager) {
+        return new TwbaTransactionManagerSpring(platformTransactionManager);
+    }
+
+    @Bean
+    public CommandBus commandBus(TwbaTransactionManager transactionManager) {
+        return new CommandBusInProcess(Collections.emptyList(), null, transactionManager);
     }
 
     @ConfigurationProperties(prefix = "twba.application")

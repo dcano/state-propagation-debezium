@@ -26,6 +26,8 @@
         <module>twba-toolkit-message-publisher-rabbitmq</module>
         <module>twba-course-management-rest</module>
         <module>twba-rating-system-amqp-listener</module>
+        <module>twba-toolkit-tx-spring</module>
+        <module>twba-state-propagation-performance-test</module>
     </modules>
 
     <properties>
@@ -53,6 +55,11 @@
             <dependency>
                 <groupId>com.twba</groupId>
                 <artifactId>twba-toolkit-cdc-debezium-postgres</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.twba</groupId>
+                <artifactId>twba-toolkit-tx-spring</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -15,12 +15,15 @@ import com.twba.tk.command.CommandHandler;
 import com.twba.tk.command.DomainCommand;
 import com.twba.tk.core.ApplicationProperties;
 import com.twba.tk.core.DomainEventAppender;
+import com.twba.tk.core.TwbaTransactionManager;
+import com.twba.tk.core.tx.TwbaTransactionManagerSpring;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 
@@ -33,8 +36,15 @@ import java.util.List;
 public class InfraConfig {
 
     @Bean
-    public CommandBus commandBus(@Autowired List<CommandHandler<? extends DomainCommand>> handlers, @Autowired DomainEventAppender domainEventAppender) {
-        return new CommandBusInProcess(handlers, domainEventAppender);
+    public TwbaTransactionManager twbaTransactionManager(@Autowired PlatformTransactionManager platformTransactionManager) {
+        return new TwbaTransactionManagerSpring(platformTransactionManager);
+    }
+
+    @Bean
+    public CommandBus commandBus(@Autowired List<CommandHandler<? extends DomainCommand>> handlers,
+                                 @Autowired DomainEventAppender domainEventAppender,
+                                 @Autowired TwbaTransactionManager transactionManager) {
+        return new CommandBusInProcess(handlers, domainEventAppender, transactionManager);
     }
 
 
