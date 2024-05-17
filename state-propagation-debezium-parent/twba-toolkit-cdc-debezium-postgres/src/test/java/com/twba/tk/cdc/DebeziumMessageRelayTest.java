@@ -26,6 +26,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -108,7 +109,7 @@ public class DebeziumMessageRelayTest {
         log.info("Adding record");
         Map<String, String> record = addRandomRecord(); //TODO assert stuff against the "record"
         log.info("Record added, waiting");
-        Thread.sleep(2000);
+        Thread.sleep(3000);
         verify(messagePublisher).publish(eventDispatchedCaptor.capture());
         CloudEvent dispatchedMessage = eventDispatchedCaptor.getValue();
         assertNotNull(dispatchedMessage);
@@ -117,13 +118,27 @@ public class DebeziumMessageRelayTest {
     private Map<String, String> addRandomRecord() {
         Map<String, String> record = new HashMap<>();
         record.put("uuid", UUID.randomUUID().toString());
-        record.put("column1", RandomStringUtils.randomAlphabetic(10));
-        record.put("column2", RandomStringUtils.randomAlphabetic(10));
+        record.put("payload", RandomStringUtils.randomAlphabetic(10));
+        record.put("type", RandomStringUtils.randomAlphabetic(10));
+        record.put("tenant_id", RandomStringUtils.randomAlphabetic(10));
+        record.put("aggregate_id", RandomStringUtils.randomAlphabetic(10));
+        record.put("epoch", String.valueOf(Instant.now().toEpochMilli()));
+        record.put("partition_key", RandomStringUtils.randomAlphabetic(10));
+        record.put("partition", "1");
+        record.put("source", RandomStringUtils.randomAlphabetic(10));
+        record.put("correlation_id", RandomStringUtils.randomAlphabetic(10));
         try (Connection conn = getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
-             PreparedStatement pst = conn.prepareStatement("insert into test_schema.test_table(uuid, column1, column2) values(?, ?, ?)")) {
+             PreparedStatement pst = conn.prepareStatement("insert into test_schema.test_table(uuid, payload, type, tenant_id, aggregate_id, epoch, partition_key, partition, source, correlation_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             pst.setString(1, record.get("uuid"));
-            pst.setString(2, record.get("column1"));
-            pst.setString(3, record.get("column2"));
+            pst.setString(2, record.get("payload"));
+            pst.setString(3, record.get("type"));
+            pst.setString(4, record.get("tenant_id"));
+            pst.setString(5, record.get("aggregate_id"));
+            pst.setLong(6, Long.parseLong(record.get("epoch")));
+            pst.setString(7, record.get("partition_key"));
+            pst.setInt(8, Integer.parseInt(record.get("partition")));
+            pst.setString(9, record.get("source"));
+            pst.setString(10, record.get("correlation_id"));
             pst.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -132,18 +147,25 @@ public class DebeziumMessageRelayTest {
     }
 
     private void initialize() {
-        try (Connection conn = getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())) {
+        try (Connection conn = getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
             PreparedStatement pstmt = conn.prepareStatement(
                     """
                     create schema if not exists test_schema;
                     create table if not exists test_schema.test_table (
                         uuid varchar not null,
-                        column1 varchar not null,
-                        column2 varchar not null,
+                        payload varchar not null,
+                        type varchar not null,
+                        tenant_id varchar not null,
+                        aggregate_id varchar not null,
+                        epoch int8 not null,
+                        partition_key varchar(1000),
+                        partition int4 not null,
+                        source varchar not null,
+                        correlation_id varchar not null,
                         primary key (uuid)
                     )
                     """
-            );
+            )) {
             pstmt.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);

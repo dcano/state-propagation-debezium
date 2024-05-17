@@ -72,7 +72,7 @@ public class DebeziumMessageRelay implements MessageRelay {
             messagePublisher.publish(event);
 
         }
-        catch (UnsupportedEncodingException e) {
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
