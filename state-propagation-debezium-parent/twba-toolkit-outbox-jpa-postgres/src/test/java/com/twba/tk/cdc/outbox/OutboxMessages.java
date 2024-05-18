@@ -12,7 +12,7 @@ import java.util.UUID;
 public class OutboxMessages {
 
     static OutboxMessage randomOutboxMessage() throws JsonProcessingException {
-        return new OutboxMessage(UUID.randomUUID().toString(), "", fakePayload(), "typeA", Instant.now().toEpochMilli(), "partitionA", "tenantTest", "correlationId_1", "test-service");
+        return new OutboxMessage(UUID.randomUUID().toString(), "", fakePayload(), "typeA", Instant.now().toEpochMilli(), "partitionA", "tenantTest", "correlationId_1", "test-service", "agregate-id-A");
     }
 
     static String fakePayload() throws JsonProcessingException {

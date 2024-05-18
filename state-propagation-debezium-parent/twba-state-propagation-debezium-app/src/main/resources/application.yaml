@@ -20,7 +20,7 @@ debezium:
     port: 5432
     server-name: "debezium-message-relay"
     server-id: "debezium-message-relay-1"
-    outbox-table: "outbox_schema.outbox"
+    outbox-table: "${CDC_OUTBOX_TABLE}:outbox_schema.outbox"
     outbox-schema: ""
   offset-storage:
     type: "org.apache.kafka.connect.storage.MemoryOffsetBackingStore"

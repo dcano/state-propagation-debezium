@@ -23,7 +23,12 @@ public class DebeziumConfiguration {
 
     @Bean
     public MessageRelay debeziumMessageRelay(@Autowired DebeziumProperties debeziumProperties,
-                                             @Autowired MessagePublisher messagePublisher) {
-        return new DebeziumMessageRelay(messagePublisher, debeziumProperties);
+                                             @Autowired CdcRecordChangeConsumer cdcRecordChangeConsumer) {
+        return new DebeziumMessageRelay(debeziumProperties, cdcRecordChangeConsumer);
+    }
+
+    @Bean
+    public CdcRecordChangeConsumer cdcRecordChangeConsumer(@Autowired MessagePublisher messagePublisher) {
+        return new DebeziumRecordChangeConsumerRabbitMQ(messagePublisher);
     }
 }

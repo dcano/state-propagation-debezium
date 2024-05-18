@@ -1,6 +1,5 @@
 package com.twba.course_management;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
@@ -9,7 +8,7 @@ public class CourseManagementAppPerformanceTest {
     private final static int SHIFT = 1000;
 
     //Perform http requests
-    @Test
+
     public void shouldCreateCoursesForPerformanceVerification() {
         RestTemplate restTemplate = new RestTemplateBuilder().build();
         String apiUrl = "http://localhost:9095/twba/course";

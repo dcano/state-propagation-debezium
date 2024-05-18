@@ -17,7 +17,7 @@ spring:
   application:
     name: "rating-system-service"
   rabbitmq:
-    host: ${RATING_SYSTEM_RABBITMQ_HOST}
-    port: ${RATING_SYSTEM_RABBITMQ_PORT}
-    username: ${RATING_SYSTEM_RABBITMQ_USERNAME}
-    password: ${RATING_SYSTEM_RABBITMQ_PASSWORD}
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}

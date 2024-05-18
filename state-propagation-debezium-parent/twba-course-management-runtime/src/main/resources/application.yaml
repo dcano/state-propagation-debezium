@@ -19,7 +19,7 @@ spring:
     hikari:
       connection-timeout: 20000
       maximum-pool-size: 8
-      pool-name: "lazulli-pool"
+      pool-name: "cdc-pool"
   jpa:
     hibernate:
       ddl-auto: validate

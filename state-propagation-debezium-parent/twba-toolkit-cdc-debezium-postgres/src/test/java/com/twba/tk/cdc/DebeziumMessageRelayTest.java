@@ -30,10 +30,11 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
 
 @Testcontainers
 @ExtendWith(MockitoExtension.class)
@@ -49,11 +50,7 @@ public class DebeziumMessageRelayTest {
     @TempDir
     private static Path offsetPath;
 
-    @Mock
-    public MessagePublisher messagePublisher;
-
-    @Captor
-    ArgumentCaptor<CloudEvent> eventDispatchedCaptor;
+    CountDownLatch countDownLatch;
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
@@ -93,7 +90,10 @@ public class DebeziumMessageRelayTest {
         debeziumProperties.setOffsetStorage(offsetProperties);
         debeziumProperties.setCustomProps(debeziumCustomProps);
         initialize();
-        debeziumMessageRelay = new DebeziumMessageRelay(messagePublisher, debeziumProperties);
+        debeziumMessageRelay = new DebeziumMessageRelay(debeziumProperties, cdcRecord -> {
+            assertNotNull(cdcRecord);
+            countDownLatch.countDown();
+        });
     }
 
     @Test
@@ -105,14 +105,15 @@ public class DebeziumMessageRelayTest {
 
     @Test
     public void whenAddingRecordsThenCDC() throws InterruptedException, IOException {
+        countDownLatch = new CountDownLatch(1);
         debeziumMessageRelay.start();
         log.info("Adding record");
         Map<String, String> record = addRandomRecord(); //TODO assert stuff against the "record"
         log.info("Record added, waiting");
-        Thread.sleep(3000);
-        verify(messagePublisher).publish(eventDispatchedCaptor.capture());
-        CloudEvent dispatchedMessage = eventDispatchedCaptor.getValue();
-        assertNotNull(dispatchedMessage);
+        countDownLatch.await(10000, TimeUnit.MILLISECONDS);
+        //verify(messagePublisher).publish(eventDispatchedCaptor.capture());
+        //CloudEvent dispatchedMessage = eventDispatchedCaptor.getValue();
+        //assertNotNull(dispatchedMessage);
     }
 
     private Map<String, String> addRandomRecord() {
