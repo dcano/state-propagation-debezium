@@ -10,24 +10,24 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>twba-toolkit</module>
-        <module>twba-toolkit-cdc-debezium-postgres</module>
-        <module>twba-toolkit-outbox-jpa-postgres</module>
-        <module>twba-state-propagation-debezium-app</module>
-        <module>twba-course-management-domain</module>
-        <module>twba-course-management-application</module>
-        <module>twba-course-management-runtime</module>
-        <module>twba-rating-system-domain</module>
-        <module>twba-rating-system-application</module>
-        <module>twba-rating-system-runtime</module>
-        <module>twba-course-management-repository-jpa</module>
-        <module>twba-course-management-repository-test</module>
-        <module>twba-course-management-repository-jpa-postgres</module>
-        <module>twba-toolkit-message-publisher-rabbitmq</module>
-        <module>twba-course-management-rest</module>
-        <module>twba-rating-system-amqp-listener</module>
-        <module>twba-toolkit-tx-spring</module>
-        <module>twba-state-propagation-performance-test</module>
+        <module>toolkit-core</module>
+        <module>toolkit-cdc-debezium-postgres</module>
+        <module>toolkit-outbox-jpa-postgres</module>
+        <module>toolkit-state-propagation-debezium-runtime</module>
+        <module>course-management-domain</module>
+        <module>course-management-application</module>
+        <module>course-management-runtime</module>
+        <module>rating-system-domain</module>
+        <module>rating-system-application</module>
+        <module>rating-system-runtime</module>
+        <module>course-management-repository-jpa</module>
+        <module>course-management-repository-test</module>
+        <module>course-management-repository-jpa-postgres</module>
+        <module>toolkit-message-publisher-rabbitmq</module>
+        <module>course-management-rest</module>
+        <module>rating-system-amqp-listener</module>
+        <module>toolkit-tx-spring</module>
+        <module>toolkit-state-propagation-performance-test</module>
     </modules>
 
     <properties>
@@ -49,72 +49,72 @@
         <dependencies>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-toolkit</artifactId>
+                <artifactId>toolkit-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-toolkit-cdc-debezium-postgres</artifactId>
+                <artifactId>toolkit-cdc-debezium-postgres</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-toolkit-tx-spring</artifactId>
+                <artifactId>toolkit-tx-spring</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-course-management-domain</artifactId>
+                <artifactId>course-management-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-course-management-repository-jpa</artifactId>
+                <artifactId>course-management-repository-jpa</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-course-management-repository-jpa-postgres</artifactId>
+                <artifactId>course-management-repository-jpa-postgres</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-course-management-rest</artifactId>
+                <artifactId>course-management-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-rating-system-domain</artifactId>
+                <artifactId>rating-system-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-rating-system-application</artifactId>
+                <artifactId>rating-system-application</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-course-management-application</artifactId>
+                <artifactId>course-management-application</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-toolkit-message-publisher-rabbitmq</artifactId>
+                <artifactId>toolkit-message-publisher-rabbitmq</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-toolkit-outbox-jpa-postgres</artifactId>
+                <artifactId>toolkit-outbox-jpa-postgres</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-rating-system-amqp-listener</artifactId>
+                <artifactId>rating-system-amqp-listener</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.twba</groupId>
-                <artifactId>twba-course-management-repository-test</artifactId>
+                <artifactId>course-management-repository-test</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
