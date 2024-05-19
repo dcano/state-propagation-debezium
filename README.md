@@ -79,3 +79,46 @@ Define the following environment variables.
 | CDC_OUTBOX_TABLE          | Name of the table that Debezium should start tailing to start the change data capture | outbox_schema.outbox | 
 
 Start the service by running ```mvn spring-boot:run``` (or mvnw wrapper) from the module ```state-propagation-debezium-runtime```
+
+### Running an Example
+
+Now it is possible to run an example. You can access both pgadmin and RabbitMQ Management Console to see what is going on:
+
+- pgadmin:
+    - URL: http://localhost:16543/login
+    - Username / password: test@test.com / test
+    - Database: postgres
+    - Database username / password: postgres / password
+- RabbitMQ Management Console:
+    - URL: http://localhost:15672
+    - Username / password: guest / guest
+
+#### Create a Course
+
+Creating a course generates a message that will be published in the ```__MR__course-management``` exchange. The *Rating System Service* has the queue ```ratingSystemInboundQueue``` bound to the exchange.
+
+The *Rating System Service* just prints a log entry after receiving the message.
+
+To create a course send a HTTP POST request to ```http://localhost:9095/twba/course```:
+
+Example: 
+
+```
+POST: http://localhost:9095/twba/course
+Content-Type: application/json
+Body:
+{
+    "id": "myCourseId1",
+    "title": "Course Title 1",
+    "summary": "Course Summary 1",
+    "description": "Course description1",
+    "teacherId": "teacherId1",
+    "openingDate": "2022-04-06T00:00:00.00Z",
+    "publicationDate": "2022-04-03T00:00:00.00Z",
+    "preRequirement": "Course pre requirement1",
+    "objective": "Course objective1",
+    "expectedDurationHours": "50",
+    "numberOfClasses": "10",
+    "status": "XX"
+}
+```
