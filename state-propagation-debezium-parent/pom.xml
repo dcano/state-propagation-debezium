@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.twba</groupId>
+    <groupId>io.twba</groupId>
     <artifactId>state-propagation-debezium-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -48,72 +48,72 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>toolkit-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>toolkit-cdc-debezium-postgres</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>toolkit-tx-spring</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>course-management-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>course-management-repository-jpa</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>course-management-repository-jpa-postgres</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>course-management-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>rating-system-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>rating-system-application</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>course-management-application</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>toolkit-message-publisher-rabbitmq</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>toolkit-outbox-jpa-postgres</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>rating-system-amqp-listener</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.twba</groupId>
+                <groupId>io.twba</groupId>
                 <artifactId>course-management-repository-test</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
