@@ -20,7 +20,7 @@ public class DebeziumMessageRelay implements MessageRelay {
     private static final Logger log = LoggerFactory.getLogger(DebeziumMessageRelay.class);
 
     private final Executor executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "debezium-message-relay"));
-    private final CdcRecordChangeConsumer debeziumRecordChangeConsumer;
+    private final CdcRecordChangeConsumer recordChangeConsumer;
     private final DebeziumEngine<RecordChangeEvent<SourceRecord>> debeziumEngine;
 
     public DebeziumMessageRelay(DebeziumProperties debeziumProperties,
@@ -29,7 +29,7 @@ public class DebeziumMessageRelay implements MessageRelay {
                 .using(DebeziumConfigurationProvider.outboxConnectorConfig(debeziumProperties).asProperties())
                 .notifying(this::handleChangeEvent)
                 .build();
-        this.debeziumRecordChangeConsumer = recordChangeConsumer;
+        this.recordChangeConsumer = recordChangeConsumer;
     }
 
     private void handleChangeEvent(RecordChangeEvent<SourceRecord> sourceRecordRecordChangeEvent)  {
@@ -37,7 +37,7 @@ public class DebeziumMessageRelay implements MessageRelay {
         Struct sourceRecordChangeValue= (Struct) sourceRecord.value();
         log.info("Received record - Key = '{}' value = '{}'", sourceRecord.key(), sourceRecord.value());
         Struct struct = (Struct) sourceRecordChangeValue.get(AFTER);
-        debeziumRecordChangeConsumer.accept(DebeziumCdcRecord.of(struct));
+        recordChangeConsumer.accept(DebeziumCdcRecord.of(struct));
     }
 
     @Override

@@ -29,6 +29,6 @@ public class DebeziumConfiguration {
 
     @Bean
     public CdcRecordChangeConsumer cdcRecordChangeConsumer(@Autowired MessagePublisher messagePublisher) {
-        return new DebeziumRecordChangeConsumerRabbitMQ(messagePublisher);
+        return new CloudEventRecordChangeConsumer(messagePublisher);
     }
 }

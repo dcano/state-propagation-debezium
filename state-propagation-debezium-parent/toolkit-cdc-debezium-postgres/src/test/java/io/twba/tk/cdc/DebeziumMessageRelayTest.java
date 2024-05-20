@@ -69,7 +69,6 @@ public class DebeziumMessageRelayTest {
 
         log.info("Offset storage file location ["+ debeziumOffsetStorageProps.get("offset.storage.file.filename")+"]");
 
-
         debeziumCustomProps = new HashMap<>();
         debeziumCustomProps.put("topic.prefix", "embedded-debezium");
         debeziumCustomProps.put("debezium.source.plugin.name", "pgoutput");
@@ -107,9 +106,6 @@ public class DebeziumMessageRelayTest {
         Map<String, String> record = addRandomRecord(); //TODO assert stuff against the "record"
         log.info("Record added, waiting");
         countDownLatch.await(10000, TimeUnit.MILLISECONDS);
-        //verify(messagePublisher).publish(eventDispatchedCaptor.capture());
-        //CloudEvent dispatchedMessage = eventDispatchedCaptor.getValue();
-        //assertNotNull(dispatchedMessage);
     }
 
     private Map<String, String> addRandomRecord() {

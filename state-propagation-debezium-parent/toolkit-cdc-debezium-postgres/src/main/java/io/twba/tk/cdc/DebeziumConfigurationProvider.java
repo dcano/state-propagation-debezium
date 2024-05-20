@@ -32,5 +32,4 @@ public class DebeziumConfigurationProvider {
         debeziumProperties.getCustomProps().forEach(debeziumConfigBuilder::with);
         return debeziumConfigBuilder;
     }
-
 }

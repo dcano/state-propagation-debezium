@@ -7,11 +7,11 @@ import io.cloudevents.core.v1.CloudEventBuilder;
 import java.net.URI;
 
 
-public class DebeziumRecordChangeConsumerRabbitMQ implements CdcRecordChangeConsumer {
+public class CloudEventRecordChangeConsumer implements CdcRecordChangeConsumer {
 
     private final MessagePublisher messagePublisher;
 
-    public DebeziumRecordChangeConsumerRabbitMQ(MessagePublisher messagePublisher) {
+    public CloudEventRecordChangeConsumer(MessagePublisher messagePublisher) {
         this.messagePublisher = messagePublisher;
     }
 
