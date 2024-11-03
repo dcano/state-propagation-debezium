@@ -38,12 +38,12 @@ jobs:
           #aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: eu-south-2
-      - name: Build with Maven
-        run: | 
-          mvn -B clean install -DskipDockerImage=true -DpublishDockerImage=false
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+      - name: Build with Maven
+        run: | 
+          mvn -B clean install -DskipDockerImage=true -DpublishDockerImage=false
       - name: Build and tag Docker image
         run: |
           # Set ECR URI and Docker tag

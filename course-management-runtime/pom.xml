@@ -109,7 +109,7 @@
                 <configuration>
                     <skip>${skipDockerImage}</skip>
                     <image>
-                        <name>${registry}/course-management-service:${project.version}</name>
+                        <name>${registry}:${project.version}</name>
                         <publish>${publishDockerImage}</publish>
                     </image>
                     <layers>
