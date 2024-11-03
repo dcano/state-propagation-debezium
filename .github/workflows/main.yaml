@@ -47,12 +47,18 @@ jobs:
         with:
           mask-password: true
       - name: Build and tag Docker image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: katas/state-propagation
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           # Set ECR URI and Docker tag
           ECR_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-south-2.amazonaws.com/katas/state-propagation
           
           # Build Docker image with Maven
-          mvn -B -pl course-management-runtime spring-boot:build-image -DskipTests=true -Dregistry=$ECR_URI -DskipDockerImage=false -DpublishDockerImage=true
+          mvn -pl course-management-runtime spring-boot:build-image -DskipTests=true -Dregistry=$REGISTRY -Drepository=$REPOSITORY -Dtag=$IMAGE_TAG -DskipDockerImage=false -DpublishDockerImage=true
+
+      # TODO: see https://github.com/aws-actions/amazon-ecr-login#docker-credentials and use as registry the output of the ECR login action, overriding the value of the pom.xml spring boot maven plugin
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       #- name: Update dependency graph
