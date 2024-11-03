@@ -119,7 +119,7 @@
                 <executions>
                     <execution>
                         <goals>
-                            <!--goal>repackage</goal-->
+                            <goal>repackage</goal>
                             <goal>build-image</goal>
                         </goals>
                     </execution>
