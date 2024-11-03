@@ -107,7 +107,20 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <maxAttempts>120</maxAttempts>
+                    <skip>${skipDockerImage}</skip>
+                    <image>
+                        <name>${registry}/course-management-service:${project.version}</name>
+                        <publish>${publishDockerImage}</publish>
+                    </image>
+                    <!--
+                    <docker>
+                        <publishRegistry>
+                            <username>${registryUser}</username>
+                            <password>${registryPassword}</password>
+                            <url>${registry}</url>
+                        </publishRegistry>
+                    </docker>
+                    -->
                     <layers>
                         <enabled>true</enabled>
                     </layers>
@@ -116,9 +129,11 @@
                     <execution>
                         <goals>
                             <goal>repackage</goal>
+                            <goal>build-image</goal>
                         </goals>
                     </execution>
                 </executions>
+
             </plugin>
 
         </plugins>
