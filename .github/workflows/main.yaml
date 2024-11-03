@@ -31,6 +31,9 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+      - name: Build with Maven
+        run: | 
+          mvn -B clean install -DskipDockerImage=true -DpublishDockerImage=false
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -42,10 +45,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
-          mask-password: false
-      - name: Build with Maven
-        run: | 
-          mvn -B clean install -DskipDockerImage=true -DpublishDockerImage=false
+          mask-password: true
       - name: Build and tag Docker image
         run: |
           # Set ECR URI and Docker tag
