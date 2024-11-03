@@ -50,7 +50,7 @@ jobs:
           ECR_URI=${{ secrets.ECR_URI }}
           
           # Build Docker image with Maven
-          ./mvnw spring-boot:build-image -DskipTests=true -Dregistry=$ECR_URI -DskipDockerImage=false -DpublishDockerImage=true
+          mvn -B spring-boot:build-image -DskipTests=true -Dregistry=$ECR_URI -DskipDockerImage=false -DpublishDockerImage=true
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       #- name: Update dependency graph
