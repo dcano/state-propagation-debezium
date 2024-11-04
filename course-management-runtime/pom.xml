@@ -110,7 +110,7 @@
                     <skip>${skipDockerImage}</skip>
                     <image>
                         <!--name>${registry}/course-management-service:${project.version}</name-->
-                        <name>${registry}/${repository}/course-management-service:${tag}</name>
+                        <name>${registry}/${repository}:${tag}</name>
                         <publish>${publishDockerImage}</publish>
                     </image>
                     <layers>
