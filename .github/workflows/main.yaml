@@ -33,7 +33,7 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: | 
-          mvn -B clean install -DskipDockerImage=true -DpublishDockerImage=false
+          mvn -B clean install -Pci -DskipDockerImage=true -DpublishDockerImage=false
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

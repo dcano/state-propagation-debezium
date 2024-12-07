@@ -101,34 +101,59 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <skip>${skipDockerImage}</skip>
-                    <image>
-                        <!--name>${registry}/course-management-service:${project.version}</name-->
-                        <name>${registry}/${repository}:${tag}</name>
-                        <publish>${publishDockerImage}</publish>
-                    </image>
-                    <layers>
-                        <enabled>true</enabled>
-                    </layers>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                            <goal>build-image</goal>
-                        </goals>
-                    </execution>
-                </executions>
+    <profiles>
+        <profile>
+            <id>local</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                    <goal>build-image</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>ci</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>${skipDockerImage}</skip>
+                            <image>
+                                <!--name>${registry}/course-management-service:${project.version}</name-->
+                                <name>${registry}/${repository}:${tag}</name>
+                                <publish>${publishDockerImage}</publish>
+                            </image>
+                            <layers>
+                                <enabled>true</enabled>
+                            </layers>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                    <goal>build-image</goal>
+                                </goals>
+                            </execution>
+                        </executions>
 
-            </plugin>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
-        </plugins>
-    </build>
+
 
 </project>
