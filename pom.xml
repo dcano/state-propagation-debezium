@@ -35,9 +35,9 @@
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <spring-boot.version>3.3.3</spring-boot.version>
+        <spring-boot.version>3.4.0</spring-boot.version>
         <hypersistence-utils-hibernate-62.version>3.7.4</hypersistence-utils-hibernate-62.version>
-        <testcontainers.version>1.19.7</testcontainers.version>
+        <testcontainers.version>1.20.3</testcontainers.version>
         <postgresql.version>42.7.3</postgresql.version>
         <commons-codec.version>1.16.0</commons-codec.version>
         <debezium.version>2.5.4.Final</debezium.version>

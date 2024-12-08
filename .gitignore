@@ -43,3 +43,5 @@ reports/*
 
 jacoco.exec
 hsperfdata_root/
+
+.fleet
