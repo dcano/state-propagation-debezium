@@ -15,7 +15,7 @@ public abstract class MultiTenantEntity extends Entity {
     @Valid
     private final TenantId tenantId;
 
-    public MultiTenantEntity(TenantId tenantId, long version) {
+    public MultiTenantEntity(TenantId tenantId, Long version) {
         super(version);
         this.tenantId = tenantId;
         this.validateProperty("tenantId");

@@ -18,7 +18,7 @@ public class CourseDefinition extends MultiTenantEntity {
     private CourseDates courseDates;
     private CourseStatus courseStatus;
 
-    private CourseDefinition(TenantId tenantId, long version, CourseId id, CourseDescription courseDescription, CourseObjective courseObjective, List<PreRequirement> preRequirements, CourseDuration duration, TeacherId teacherId, CourseDates courseDates, CourseStatus courseStatus) {
+    private CourseDefinition(TenantId tenantId, Long version, CourseId id, CourseDescription courseDescription, CourseObjective courseObjective, List<PreRequirement> preRequirements, CourseDuration duration, TeacherId teacherId, CourseDates courseDates, CourseStatus courseStatus) {
         super(tenantId, version);
         this.id = id;
         this.courseDescription = courseDescription;
@@ -98,7 +98,7 @@ public class CourseDefinition extends MultiTenantEntity {
 
         public CourseDefinition createNew() {
             //new instance, generate domain event
-            CourseDefinition courseDefinition = new CourseDefinition(tenantId, 0L, id, courseDescription, courseObjective, preRequirements, duration, teacherId, courseDates, CourseStatus.PENDING_TO_REVIEW);
+            CourseDefinition courseDefinition = new CourseDefinition(tenantId, null, id, courseDescription, courseObjective, preRequirements, duration, teacherId, courseDates, CourseStatus.PENDING_TO_REVIEW);
             var courseDefinitionCreatedEvent = CourseDefinitionCreatedEvent.triggeredFrom(courseDefinition);
             courseDefinition.record(courseDefinitionCreatedEvent);
             return courseDefinition;
