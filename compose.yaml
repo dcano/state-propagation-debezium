@@ -17,7 +17,7 @@ services:
     ports:
       - 16543:80
     volumes:
-      - ./pgadmin-servers.json:/pgadmin4/servers.json
+      - ./.temp/pgadmin-servers.json:/pgadmin4/servers.json
   rabbitmq:
     image: rabbitmq:3.13.1-management
     ports:
@@ -34,10 +34,10 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./temp/data
+      device: .temp/data
   rabbitmq-data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./temp/rabbitmq
+      device: .temp/rabbitmq

@@ -1,5 +1,11 @@
 server:
-  port: 9095
+  ssl:
+    key-store: ./store/keystore-self.jks
+    key-store-password: ${CERTS_PASSWORD}
+    key-alias: course-management
+    key-password: ${CERTS_PASSWORD}
+    enabled: true
+  port: 8443
 
 management:
   endpoints:
@@ -30,6 +36,10 @@ spring:
     schemas: db_migrations
     out-of-order: true
     enabled: true
+  security:
+    user:
+      name: ${USER_NAME_TEST}
+      password: ${USER_PASSWORD_TEST}
 logging:
   level:
     org.hibernate.SQL: WARN
