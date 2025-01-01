@@ -28,6 +28,8 @@
         <module>rating-system-amqp-listener</module>
         <module>toolkit-tx-spring</module>
         <module>toolkit-state-propagation-performance-test</module>
+        <module>course-management-config</module>
+        <module>toolkit-security-adapters</module>
     </modules>
 
     <properties>
@@ -101,12 +103,22 @@
             </dependency>
             <dependency>
                 <groupId>io.twba</groupId>
+                <artifactId>course-management-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.twba</groupId>
                 <artifactId>toolkit-message-publisher-rabbitmq</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.twba</groupId>
                 <artifactId>toolkit-outbox-jpa-postgres</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.twba</groupId>
+                <artifactId>toolkit-security-adapters</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Testcontainers
 @ContextConfiguration(classes = {CourseManagementApp.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles({"postgres"})
+@ActiveProfiles({"postgres, unsafe"})
 public class CourseManagementAppTest {
 
     @Container

@@ -1,6 +1,6 @@
 server:
   ssl:
-    key-store: ./store/keystore-self.jks
+    key-store: ${KEYSTORE_FOLDER}/keystore-self.jks
     key-store-password: ${CERTS_PASSWORD}
     key-alias: course-management
     key-password: ${CERTS_PASSWORD}
@@ -17,6 +17,11 @@ twba:
   application:
     name: "course-management"
     uri: "https://thewhiteboardarchitect.com/${twba.application.name}"
+  allowed-services:
+    -
+      service-name: rating-service
+      roles:
+        - READ
 
 spring:
   application:

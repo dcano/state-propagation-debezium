@@ -32,6 +32,10 @@
         </dependency>
         <dependency>
             <groupId>io.twba</groupId>
+            <artifactId>course-management-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.twba</groupId>
             <artifactId>toolkit-outbox-jpa-postgres</artifactId>
         </dependency>
         <dependency>
@@ -49,10 +53,6 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-amqp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>

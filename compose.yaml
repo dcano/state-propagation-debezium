@@ -5,7 +5,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
     volumes:
-      - postgres-db-volume:/var/lib/postgresql/data
+      - ./.temp/data:/var/lib/postgresql/data
+      #- postgres-db-volume:/var/lib/postgresql/data
     ports:
       - 5432:5432
     command: ['postgres', '-c', 'wal_level=logical']
@@ -27,17 +28,18 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - ./.temp/rabbitmq:/var/lib/rabbitmq
+      #- rabbitmq-data:/var/lib/rabbitmq
 volumes:
   postgres-db-volume:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: .temp/data
+      device: ${PWD}/.temp/data
   rabbitmq-data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: .temp/rabbitmq
+      device: ${PWD}/.temp/rabbitmq
