@@ -1,5 +1,14 @@
 server:
-  port: 9096
+  ssl:
+    key-store: ${KEYSTORE_FOLDER}/keystore-rating-system.jks
+    key-store-password: ${CERTS_PASSWORD}
+    key-alias: rating-system
+    key-password: ${CERTS_PASSWORD}
+    trust-store: ${TRUSTSTORE_FOLDER}/truststore.jks
+    enabled: true
+    trust-store-password: ${CERTS_PASSWORD}
+    client-auth: need
+  port: 8444
 
 management:
   endpoints:
@@ -11,6 +20,13 @@ twba:
   application:
     name: "rating-system"
     uri: "https://thewhiteboardarchitect.com/${twba.application.name}"
+  mtls-client:
+    key-store-path: ${KEYSTORE_FOLDER}/keystore-rating-system.jks
+    key-store-password: ${CERTS_PASSWORD}
+    key-alias: rating-system
+    key-password: ${CERTS_PASSWORD}
+    trust-store-path: ${TRUSTSTORE_FOLDER}/truststore.jks
+    trust-store-password: ${CERTS_PASSWORD}
 
 
 spring:

@@ -1,10 +1,13 @@
 server:
   ssl:
-    key-store: ${KEYSTORE_FOLDER}/keystore-self.jks
+    key-store: ${KEYSTORE_FOLDER}/keystore-course-management.jks
     key-store-password: ${CERTS_PASSWORD}
     key-alias: course-management
     key-password: ${CERTS_PASSWORD}
+    trust-store: ${TRUSTSTORE_FOLDER}/truststore.jks
     enabled: true
+    trust-store-password: ${CERTS_PASSWORD}
+    client-auth: need
   port: 8443
 
 management:
@@ -20,6 +23,11 @@ twba:
   allowed-services:
     -
       service-name: rating-service
+      roles:
+        - READ
+        - WRITE
+    -
+      service-name: fake-service
       roles:
         - READ
 

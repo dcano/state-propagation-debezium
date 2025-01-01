@@ -30,6 +30,7 @@
         <module>toolkit-state-propagation-performance-test</module>
         <module>course-management-config</module>
         <module>toolkit-security-adapters</module>
+        <module>rating-system-adapters</module>
     </modules>
 
     <properties>
