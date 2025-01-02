@@ -1,14 +1,5 @@
 server:
-  ssl:
-    key-store: ${KEYSTORE_FOLDER}/keystore-rating-system.jks
-    key-store-password: ${CERTS_PASSWORD}
-    key-alias: rating-system
-    key-password: ${CERTS_PASSWORD}
-    trust-store: ${TRUSTSTORE_FOLDER}/truststore.jks
-    enabled: true
-    trust-store-password: ${CERTS_PASSWORD}
-    client-auth: need
-  port: 8444
+  port: 9096
 
 management:
   endpoints:
@@ -27,6 +18,9 @@ twba:
     key-password: ${CERTS_PASSWORD}
     trust-store-path: ${TRUSTSTORE_FOLDER}/truststore.jks
     trust-store-password: ${CERTS_PASSWORD}
+  external-services:
+    - service-name: "course-management"
+      service-url: ${COURSE_MANAGEMENT_URL}
 
 
 spring:

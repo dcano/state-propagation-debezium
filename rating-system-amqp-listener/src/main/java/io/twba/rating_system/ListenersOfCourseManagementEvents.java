@@ -1,6 +1,5 @@
-package io.twba.rating_system.amqp;
+package io.twba.rating_system;
 
-import io.twba.tk.command.CommandBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.Exchange;
@@ -10,16 +9,18 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
-public class ListenersOfCourseManagementEvents {
+class ListenersOfCourseManagementEvents {
 
-    private final static Logger log = LoggerFactory.getLogger(ListenersOfCourseManagementEvents.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ListenersOfCourseManagementEvents.class);
 
-    private final CommandBus commandBus;
+    private final CourseManagementService courseManagementService;
 
     @Autowired
-    public ListenersOfCourseManagementEvents(CommandBus commandBus) {
-        this.commandBus = commandBus;
+    ListenersOfCourseManagementEvents(CourseManagementService courseManagementService) {
+        this.courseManagementService = courseManagementService;
     }
 
     @RabbitListener(bindings = @QueueBinding(
@@ -28,7 +29,8 @@ public class ListenersOfCourseManagementEvents {
             key = "com.twba.course_management.coursedefinitioncreatedevent")
     )
     public void processOrder(String courseDefinitionJson) {
-        log.info("Message received:::::{}", courseDefinitionJson);
+        LOGGER.info("Message received:::::{}", courseDefinitionJson);
+        LOGGER.info("Data received from the course management service {}", courseManagementService.retrieveCourse(UUID.randomUUID().toString()).orElse(CourseData.empty()).courseId().id());
     }
 
 }

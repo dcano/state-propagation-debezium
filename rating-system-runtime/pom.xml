@@ -24,6 +24,10 @@
         </dependency>
         <dependency>
             <groupId>io.twba</groupId>
+            <artifactId>rating-system-adapters</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.twba</groupId>
             <artifactId>toolkit-tx-spring</artifactId>
         </dependency>
         <dependency>
@@ -37,6 +41,14 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5</artifactId>
         </dependency>
     </dependencies>
 

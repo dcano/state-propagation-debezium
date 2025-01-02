@@ -3,7 +3,7 @@ package io.twba.tk.security;
 import lombok.Data;
 
 @Data
-public class MtlsClient {
+public class MtlsClientProperties {
 
     private String keyStorePath;
     private String keyStorePassword;
