@@ -14,7 +14,7 @@ public class DebeziumConfigurationProvider {
                 .with("database.port", properties.getSourceDatabaseProperties().getPort())
                 .with("database.user", properties.getSourceDatabaseProperties().getUser())
                 .with("database.password", properties.getSourceDatabaseProperties().getPassword())
-                .with("database.dbname", properties.getSourceDatabaseProperties().getDbName()), properties)
+                .with("database.dbname", properties.getSourceDatabaseProperties().getDbName()),properties)
                 .with("database.server.id", properties.getSourceDatabaseProperties().getServerId())
                 .with("database.server.name", properties.getSourceDatabaseProperties().getServerName())
                 .with("skipped.operations", "u,d,t")

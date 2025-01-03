@@ -29,7 +29,7 @@ The infrastructure needed for running the example is conformed by:
 - **Postgres Database:** Used by the *Course Management Service* to persists its state as well as for adding events to the transactional outbox.
 - **RabbitMQ:** Used by the State Propagation Service to publish messages.
 
-These services are spinned up using docker compose, the corresponding ```compose.yaml``` is located in the project root. Just exectue ```docker compose up``` to hava it running.
+These services are started up using docker compose, the corresponding ```compose.yaml``` is located in the project root. Just exectue ```docker compose up``` to hava it running.
 
 ### Starting the services
 
@@ -51,18 +51,19 @@ Define the following environment variables.
 | POSTGRES_SERVICE_NAME     | Database hostname:                | localhost |
 | POSTGRES_SERVICE_PORT     | Database port:                    | 5432      |
 
-Start the service by running ```mvn spring-boot:run``` (or mvnw wrapper) from the module ```course-management-runtime```
+Make sure to use the **"unsafe"** spring profile. Start the service by running ```mvn spring-boot:run -Dspring-boot.run.profiles=postgres,dev,unsafe``` (or mvnw wrapper) from the module ```course-management-runtime```. The "unsafe" profile ensures the APIs can be called without authentication.
 
 #### Rating System Service
 
 Define the following environment variables.
 
-| Variable                  | Description             | Value      |
-|---------------------------|-------------------------|-------------
-| RABBITMQ_HOST             | RabbitMQ hostname.      | localhost  |
-| RABBITMQ_PORT             | RabbitMQ port.          | 5672       |
-| RABBITMQ_USERNAME         | RabbitMQ username.      | guest      |
-| RABBITMQ_PASSWORD         | RabbitMQ password.      | guest      |
+| Variable                  | Description                                                            | Value                  |
+|---------------------------|------------------------------------------------------------------------|------------------------|
+| RABBITMQ_HOST             | RabbitMQ hostname.                                                     | localhost              |
+| RABBITMQ_PORT             | RabbitMQ port.                                                         | 5672                   |
+| RABBITMQ_USERNAME         | RabbitMQ username.                                                     | guest                  |
+| RABBITMQ_PASSWORD         | RabbitMQ password.                                                     | guest                  |
+| COURSE_MANAGEMENT_URL     | Course management base URL. Must match the provided CN when using mTLS | http://localhost:9095  |
 
 Start the service by running ```mvn spring-boot:run``` (or mvnw wrapper) from the module ```rating-system-runtime```
 
@@ -122,3 +123,73 @@ Body:
     "status": "XX"
 }
 ```
+
+## mTLS between the Rating Service and the Course Management Service
+
+mTLS allows services to interact securely with a mutually authenticated and encrypted channel. This kind of security can be used to connect the Rating System Module with the Course Management Module, for the former to retrieve the details of a course.
+
+### Required cryptographic material
+
+For this example to work
+
+- The Course Management Service (acting a server) requires a public certificate and a private key.
+- The Rating System Service (acting as client) also requires a public certificate and a private key.
+- For both services, the public certificates must be signed by the private key of a Root CA that both services trust.
+
+#### Self-signed CA
+
+A self signed CA is used to sign the public certificates of the services. Trusted CAs (e.g. Let's Encrypt) are also valid, as long as are trusted by both services.
+
+- Execute the following command to create the Root CA public certificate and private keys: ``openssl req -x509 -sha256 -days 3650 -newkey rsa:4096 -keyout rootCA.key -out rootCA.crt``
+- You will be asked for the RootCA Private Key password (ROOTCA_PASWORD). Define the password you want, but ensure you take note of it since will be needed later.
+- Create a truststore containing the public certificate of the RootCA. This will be needed by the services to establish the mTLS connection. Use the following command: ``keytool -import -trustcacerts -noprompt -alias ca -file rootCA.crt -keystore truststore.jks`` 
+
+#### Course Management Service mTLS configuration
+
+This service is acting as Server, since it is exposing an endpoint that will be used by the Rating System Service to retrieve the details of a course by id. The service must hold a public certificate and private key:
+
+- Execute the following command to generate the private key and the certificate signing request (CSR). A password for the newly generated private key (COURSE_MANAGEMENT_PASSWORD) must be provided: ``openssl req -new -newkey rsa:4096 -keyout course-management.key -out course-management.csr``
+- Create a file *course-management.ext* with the following content, feel free to choose your DNS.1 value, but make sure it matches the DNS used to access the service:
+```
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = course-management-127.0.0.1.nip.io
+```
+- Sign the CSR with the following command, you will be asked to provide the ROOTCA_PASSWORD: ``openssl x509 -req -CA rootCA.crt -CAkey rootCA.key -in course-management.csr -out course-management.crt -days 365 -CAcreateserial -extfile course-management.ext``
+- The Course Management Service private key (_course-management.key_) and public x.509 certificate (_course-management.crt_) are now in place.
+- Create a bundled PKCS12 archive containing both public certificate and private key. This bundle is then imported in a keystore artifact. Use the following command: ``openssl pkcs12 -export -out course-management.p12 -name "course-management" -inkey course-management.key -in course-management.crt``
+- Import the PCKS12 file in a keystore with the command: ``keytool -importkeystore -srckeystore course-management.p12 -srcstoretype PKCS12 -destkeystore keystore-course-management.jks -deststoretype JKS``
+- Define the following environment variables for the Course Management runtime:
+
+| Variable              | Description                                                                               |
+|-----------------------|-------------------------------------------------------------------------------------------|
+| KEYSTORE_FOLDER       | Path where the file containing the key store *keystore-course-management.jks* is located. |
+| TRUSTSTORE_FOLDER     | Path where the file containing the trust store store *truststore.jks* is located.         |
+| KEY_STORE_PASSWORD    | Password of the key store *keystore-course-management.jks*                                |
+| PRIVATE_KEY_PASSWORD  | Password of the private key of the Course Management Service (COURSE_MANAGEMENT_PASSWORD) |
+| TRUST_STORE_PASSWORD  | Password of the trust store *truststore.jks*                                              |
+
+
+- Start the Course Management Service with a secured configuration (i.e. removing the "unsafe" profile): ```mvn spring-boot:run -Dspring-boot.run.profiles=postgres,dev```
+- With this configuration it will not be possible to create courses as before, since the client must be authenticated with mTLS. To create courses, use the unsafe profile as outlined above.
+- The Course Management Service has a whitelist of allowed services in its ``application.yaml`` file under ``twba.allowed-services``. Any certificate with CN matching any of the whitelisted "service-name" and signed with the trusted root CA can be used.
+
+#### Rating System Service mTLS configuration
+
+This service is acting a Client. It is making the https call to retrieve the course data from the Course Management Service, when invoking the endpoint ``/rating/{courseId}``. As client, the Rating System Service also needs a public certificate and private key bundled in its own key store. To ensure the service is authenticated, the whitelisted service name **rating-service** must be provided as CN.
+
+- Create the private key and the CSR for the Rating System Service, providing the corresponding private key password (RATING_SYSTEM_PASSWORD). Ensure to define **rating-service** as Common Name (CN): ``openssl req -new -newkey rsa:4096 -nodes -keyout rating-system.key -out rating-system.csr``
+- Sign the CSR with the same root CA private key: ``openssl x509 -req -CA rootCA.crt -CAkey rootCA.key -in rating-system.csr -out rating-system.crt -days 365 -CAcreateserial``
+- Bundle both the private key and public certificate in a PKCS12 file: ``openssl pkcs12 -export -out rating-system.p12 -name "rating-system" -inkey rating-system.key -in rating-system.crt``
+- Create the key store for the Rating System importing the bundled p12 file, providing a password for the newly created key store: ``keytool -importkeystore -srckeystore rating-system.p12 -srcstoretype PKCS12 -destkeystore keystore-rating-system.jks -deststoretype JKS``
+- Define the following environment variables for the Rating System runtime:
+
+| Variable              | Description                                                                               |
+|-----------------------|-------------------------------------------------------------------------------------------|
+| KEYSTORE_FOLDER       | Path where the file containing the key store *keystore-rating-system.jks* is located. |
+| TRUSTSTORE_FOLDER     | Path where the file containing the trust store store *truststore.jks* is located.         |
+| KEY_STORE_PASSWORD    | Password of the key store *keystore-course-management.jks*                                |
+| PRIVATE_KEY_PASSWORD  | Password of the private key of the Course Management Service (COURSE_MANAGEMENT_PASSWORD) |
+| TRUST_STORE_PASSWORD  | Password of the trust store *truststore.jks*                                              |

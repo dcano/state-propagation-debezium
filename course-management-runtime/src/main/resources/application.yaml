@@ -1,12 +1,12 @@
 server:
   ssl:
     key-store: ${KEYSTORE_FOLDER}/keystore-course-management.jks
-    key-store-password: ${CERTS_PASSWORD}
+    key-store-password: ${KEY_STORE_PASSWORD}
     key-alias: course-management
-    key-password: ${CERTS_PASSWORD}
+    key-password: ${PRIVATE_KEY_PASSWORD}
     trust-store: ${TRUSTSTORE_FOLDER}/truststore.jks
     enabled: true
-    trust-store-password: ${CERTS_PASSWORD}
+    trust-store-password: ${TRUST_STORE_PASSWORD}
     client-auth: need
   port: 8443
 

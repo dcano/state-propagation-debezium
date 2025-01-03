@@ -1,6 +1,8 @@
 package io.twba.rating_system.config;
 
 import io.twba.tk.security.MtlsClientProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,11 +18,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Objects;
 
 @Configuration
 public class MtlsClientConfig {
 
-    public static final String KEYSTORE_TYPE = "JKS";
+    private static final Logger LOGGER = LoggerFactory.getLogger(MtlsClientConfig.class);
+    private static final String KEYSTORE_TYPE = "JKS";
 
     @Bean
     @ConfigurationProperties(prefix = "twba.mtls-client")
@@ -31,8 +35,10 @@ public class MtlsClientConfig {
     @Bean
     public RestTemplate mtlsRestTemplate(@Autowired MtlsClientProperties mtlsClientProperties)  {
         SSLContext sslContext = configureSSLContext(mtlsClientProperties);
-        return new RestTemplate(createRequestFactory(sslContext));
-
+        if(Objects.nonNull(sslContext)) {
+            return new RestTemplate(createRequestFactory(sslContext));
+        }
+        return new RestTemplate();
     }
 
     private SSLContext configureSSLContext(MtlsClientProperties mtlsClientProperties) {
@@ -56,7 +62,8 @@ public class MtlsClientConfig {
 
             return sslContext;
         } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException | UnrecoverableKeyException | KeyManagementException e) {
-            throw new RuntimeException("Error configuring SSLContext", e);
+            LOGGER.warn("Error configuring SSLContext, falling back to non-secured rest client", e);
+            return null;
         }
     }
 

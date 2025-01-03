@@ -13,14 +13,14 @@ twba:
     uri: "https://thewhiteboardarchitect.com/${twba.application.name}"
   mtls-client:
     key-store-path: ${KEYSTORE_FOLDER}/keystore-rating-system.jks
-    key-store-password: ${CERTS_PASSWORD}
+    key-store-password: ${KEY_STORE_PASSWORD}
     key-alias: rating-system
-    key-password: ${CERTS_PASSWORD}
+    key-password: ${PRIVATE_KEY_PASSWORD}
     trust-store-path: ${TRUSTSTORE_FOLDER}/truststore.jks
-    trust-store-password: ${CERTS_PASSWORD}
+    trust-store-password: ${TRUST_STORE_PASSWORD}
   external-services:
     - service-name: "course-management"
-      service-url: ${COURSE_MANAGEMENT_URL}
+      service-url: ${COURSE_MANAGEMENT_URL:http://localhost:9095}
 
 
 spring:
