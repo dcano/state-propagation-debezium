@@ -138,7 +138,7 @@ For this example to work
 
 #### Self-signed CA
 
-A self signed CA is used to sign the public certificates of the services. Trusted CAs (e.g. Let's Encrypt) are also valid, as long as are trusted by both services.
+A self-signed CA is used to sign the public certificates of the services. Trusted CAs (e.g. Let's Encrypt) are also valid, as long as are trusted by both services.
 
 - Execute the following command to create the Root CA public certificate and private keys: ``openssl req -x509 -sha256 -days 3650 -newkey rsa:4096 -keyout rootCA.key -out rootCA.crt``
 - You will be asked for the RootCA Private Key password (ROOTCA_PASWORD). Define the password you want, but ensure you take note of it since will be needed later.
@@ -172,7 +172,7 @@ DNS.1 = course-management-127.0.0.1.nip.io
 | TRUST_STORE_PASSWORD  | Password of the trust store *truststore.jks*                                              |
 
 
-- Start the Course Management Service with a secured configuration (i.e. removing the "unsafe" profile): ```mvn spring-boot:run -Dspring-boot.run.profiles=postgres,dev```
+- Start the Course Management Service with a secured configuration (i.e. removing the "unsafe" profile) and with "sslclassic" profile selected: ```mvn spring-boot:run -Dspring-boot.run.profiles=postgres,dev,sslclassic```
 - With this configuration it will not be possible to create courses as before, since the client must be authenticated with mTLS. To create courses, use the unsafe profile as outlined above.
 - The Course Management Service has a whitelist of allowed services in its ``application.yaml`` file under ``twba.allowed-services``. Any certificate with CN matching any of the whitelisted "service-name" and signed with the trusted root CA can be used.
 
@@ -193,3 +193,18 @@ This service is acting a Client. It is making the https call to retrieve the cou
 | KEY_STORE_PASSWORD    | Password of the key store *keystore-course-management.jks*                                |
 | PRIVATE_KEY_PASSWORD  | Password of the private key of the Course Management Service (COURSE_MANAGEMENT_PASSWORD) |
 | TRUST_STORE_PASSWORD  | Password of the trust store *truststore.jks*                                              |
+
+## SSL Bundles
+
+Thanks to [grantlittle.me](https://grantlittle.me/2024/08/16/mtls-client-authentication-with-spring-boot/), great post!
+
+SSL bundles simplified the configuration and management of trust materials in spring boot 3.1+ based applications. SSLBundles are autoconfigured with the provided configuration, creating instances of higher order abstractions that provide access to the "classical" objects SSLContext, KeyStore, etc.
+
+Both Course Management Service and Rating System Service can be started with classical TLS configuration or with SSLBundles using the corresponding spring profile:
+
+| Module                    | Profiles                                                                                                                |
+|---------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| course-management-runtime | sslclassic - starts the application without ssl bundles.<br>sslbundle - starts the application with ssl bundles.        |
+| rating-system-runtime     | sslbundle - starts the application with ssl bundles.<br>If no profile is specified, uses the classical configuration    |
+
+With SSL Bundles the keystore jks file for the services are automatically created by spring based on the provided *.p12 bundle with public certificate and private key.

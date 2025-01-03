@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +22,7 @@ import java.security.cert.CertificateException;
 import java.util.Objects;
 
 @Configuration
+@Profile("!sslbundle")
 public class MtlsClientConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MtlsClientConfig.class);
