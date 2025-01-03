@@ -1,5 +1,14 @@
 server:
-  port: 9095
+  ssl:
+    key-store: ${KEYSTORE_FOLDER}/keystore-course-management.jks
+    key-store-password: ${KEY_STORE_PASSWORD}
+    key-alias: course-management
+    key-password: ${PRIVATE_KEY_PASSWORD}
+    trust-store: ${TRUSTSTORE_FOLDER}/truststore.jks
+    enabled: true
+    trust-store-password: ${TRUST_STORE_PASSWORD}
+    client-auth: need
+  port: 8443
 
 management:
   endpoints:
@@ -11,6 +20,16 @@ twba:
   application:
     name: "course-management"
     uri: "https://thewhiteboardarchitect.com/${twba.application.name}"
+  allowed-services:
+    -
+      service-name: rating-service
+      roles:
+        - READ
+        - WRITE
+    -
+      service-name: fake-service
+      roles:
+        - READ
 
 spring:
   application:

@@ -1,10 +1,12 @@
 package io.twba.course_management.rest;
 
+import io.twba.course_management.CourseView;
 import io.twba.course_management.rest.mapper.CourseManagementRequestMappers;
 import io.twba.tk.command.CommandBus;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,6 +32,12 @@ public class CourseManagementController {
         commandBus.push(command);
     }
 
+
+    @PreAuthorize("hasAuthority('READ')")
+    @GetMapping(value = "/course/{courseId}")
+    public CourseView retrieveCourse(@PathVariable("courseId") String courseId) {
+        return new CourseView(courseId);
+    }
 
     @Data
     public static class CreateCourseDefinitionRequest {

@@ -32,6 +32,10 @@
         </dependency>
         <dependency>
             <groupId>io.twba</groupId>
+            <artifactId>course-management-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.twba</groupId>
             <artifactId>toolkit-outbox-jpa-postgres</artifactId>
         </dependency>
         <dependency>

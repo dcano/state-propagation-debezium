@@ -21,6 +21,7 @@ public class DomainEventAppender {
     private final ObjectMapper objectMapper;
     private final ApplicationProperties applicationProperties;
 
+
     public DomainEventAppender(Outbox outbox, ObjectMapper objectMapper, ApplicationProperties applicationProperties) {
         this.outbox = outbox;
         this.objectMapper = objectMapper;

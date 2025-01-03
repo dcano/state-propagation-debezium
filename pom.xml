@@ -28,6 +28,10 @@
         <module>rating-system-amqp-listener</module>
         <module>toolkit-tx-spring</module>
         <module>toolkit-state-propagation-performance-test</module>
+        <module>course-management-config</module>
+        <module>toolkit-security-adapters</module>
+        <module>rating-system-adapters</module>
+        <module>rating-system-rest</module>
     </modules>
 
     <properties>
@@ -35,15 +39,16 @@
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <spring-boot.version>3.4.0</spring-boot.version>
+        <spring-boot.version>3.4.1</spring-boot.version>
         <hypersistence-utils-hibernate-62.version>3.7.4</hypersistence-utils-hibernate-62.version>
-        <testcontainers.version>1.20.3</testcontainers.version>
+        <testcontainers.version>1.20.4</testcontainers.version>
         <postgresql.version>42.7.3</postgresql.version>
         <commons-codec.version>1.16.0</commons-codec.version>
         <debezium.version>2.5.4.Final</debezium.version>
         <cloudevents.version>3.0.0</cloudevents.version>
         <jakarta.inject.version>2.0.1</jakarta.inject.version>
         <flyway-core.version>10.17.2</flyway-core.version>
+        <springdoc-openapi.version>2.7.0</springdoc-openapi.version>
     </properties>
 
     <dependencyManagement>
@@ -100,6 +105,16 @@
             </dependency>
             <dependency>
                 <groupId>io.twba</groupId>
+                <artifactId>course-management-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.twba</groupId>
+                <artifactId>rating-system-adapters</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.twba</groupId>
                 <artifactId>toolkit-message-publisher-rabbitmq</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -110,7 +125,17 @@
             </dependency>
             <dependency>
                 <groupId>io.twba</groupId>
+                <artifactId>toolkit-security-adapters</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.twba</groupId>
                 <artifactId>rating-system-amqp-listener</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.twba</groupId>
+                <artifactId>rating-system-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -140,6 +165,16 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-security</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc-openapi.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>

@@ -45,3 +45,6 @@ jacoco.exec
 hsperfdata_root/
 
 .fleet
+
+.temp
+/.certs/
