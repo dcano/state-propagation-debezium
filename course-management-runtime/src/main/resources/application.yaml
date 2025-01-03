@@ -49,10 +49,6 @@ spring:
     schemas: db_migrations
     out-of-order: true
     enabled: true
-  security:
-    user:
-      name: ${USER_NAME_TEST}
-      password: ${USER_PASSWORD_TEST}
 logging:
   level:
     org.hibernate.SQL: WARN
