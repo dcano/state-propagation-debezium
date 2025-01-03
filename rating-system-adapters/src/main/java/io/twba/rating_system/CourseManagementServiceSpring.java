@@ -12,6 +12,7 @@ import java.util.Optional;
 @Component
 class CourseManagementServiceSpring implements CourseManagementService {
 
+    private static final String COURSE_MANAGEMENT_CONTEXT = "/twba/course";
     private static final String COURSE_MANAGEMENT_SERVICE = "course-management";
 
     private final RestTemplate restTemplate;
@@ -29,7 +30,7 @@ class CourseManagementServiceSpring implements CourseManagementService {
 
     @Override
     public Optional<CourseData> retrieveCourse(String courseId) {
-        var getCourseUrl = courseManagementServiceBaseUrl + "/" + courseId;
+        var getCourseUrl = courseManagementServiceBaseUrl + COURSE_MANAGEMENT_CONTEXT + "/" + courseId;
         ResponseEntity<CourseData> response = restTemplate.getForEntity(getCourseUrl, CourseData.class);
         return Optional.ofNullable(response.getBody());
 

@@ -30,7 +30,7 @@ class ListenersOfCourseManagementEvents {
     )
     public void processOrder(String courseDefinitionJson) {
         LOGGER.info("Message received:::::{}", courseDefinitionJson);
-        LOGGER.info("Data received from the course management service {}", courseManagementService.retrieveCourse(UUID.randomUUID().toString()).orElse(CourseData.empty()).courseId().id());
+        LOGGER.info("Data received from the course management service {}", courseManagementService.retrieveCourse(UUID.randomUUID().toString()).orElse(CourseData.empty()).courseId());
     }
 
 }

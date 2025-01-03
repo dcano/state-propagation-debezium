@@ -35,7 +35,7 @@ public class CourseManagementController {
 
     @PreAuthorize("hasAuthority('READ')")
     @GetMapping(value = "/course/{courseId}")
-    public CourseView retrieveCourse(@PathVariable String courseId) {
+    public CourseView retrieveCourse(@PathVariable("courseId") String courseId) {
         return new CourseView(courseId);
     }
 

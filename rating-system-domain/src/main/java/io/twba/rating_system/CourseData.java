@@ -1,7 +1,9 @@
 package io.twba.rating_system;
 
-record CourseData(CourseId courseId) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+record CourseData(@JsonProperty("courseId") String courseId) {
     public static CourseData empty() {
-        return new CourseData(new CourseId(""));
+        return new CourseData("");
     }
 }

@@ -28,6 +28,10 @@
         </dependency>
         <dependency>
             <groupId>io.twba</groupId>
+            <artifactId>rating-system-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.twba</groupId>
             <artifactId>toolkit-tx-spring</artifactId>
         </dependency>
         <dependency>

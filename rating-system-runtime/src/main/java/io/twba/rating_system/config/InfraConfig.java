@@ -9,7 +9,6 @@ import io.twba.tk.core.ApplicationProperties;
 import io.twba.tk.core.DomainEventAppender;
 import io.twba.tk.core.ExternalService;
 import io.twba.tk.core.TwbaTransactionManager;
-import io.twba.tk.core.tx.TwbaTransactionManagerSpring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
@@ -19,7 +18,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,14 +31,25 @@ import java.util.List;
 @Configuration
 public class InfraConfig {
 
-    @Bean
-    public TwbaTransactionManager twbaTransactionManager(@Autowired PlatformTransactionManager platformTransactionManager) {
-        return new TwbaTransactionManagerSpring(platformTransactionManager);
-    }
 
     @Bean
-    public CommandBus commandBus(TwbaTransactionManager transactionManager) {
-        return new CommandBusInProcess(Collections.emptyList(), null, transactionManager);
+    public CommandBus commandBus() {
+        return new CommandBusInProcess(Collections.emptyList(), null, new TwbaTransactionManager() {
+            @Override
+            public void begin() {
+
+            }
+
+            @Override
+            public void commit() {
+
+            }
+
+            @Override
+            public void rollback() {
+
+            }
+        });
     }
 
     @ConfigurationProperties(prefix = "twba.application")

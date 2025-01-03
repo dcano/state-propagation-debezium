@@ -35,14 +35,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, ServiceAuthenticator serviceAuthenticator) throws Exception {
 
-        http.x509(x509 -> x509.subjectPrincipalRegex("CN=(.*?)(?:,|$)").userDetailsService(userDetailsService(serviceAuthenticator)))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/actuator/**").permitAll()
-                        .anyRequest()
-                        .authenticated()
-
-                )
+        http.authorizeHttpRequests(authorize ->
+                        authorize.requestMatchers("/actuator/**").permitAll()
+                                .anyRequest().authenticated())
+                .x509(x509 -> x509.subjectPrincipalRegex("CN=(.*?)(?:,|$)")
+                        .userDetailsService(userDetailsService(serviceAuthenticator)))
                 .csrf(AbstractHttpConfigurer::disable);
+
         return http.build();
     }
 

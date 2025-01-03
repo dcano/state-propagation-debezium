@@ -31,6 +31,7 @@
         <module>course-management-config</module>
         <module>toolkit-security-adapters</module>
         <module>rating-system-adapters</module>
+        <module>rating-system-rest</module>
     </modules>
 
     <properties>
@@ -130,6 +131,11 @@
             <dependency>
                 <groupId>io.twba</groupId>
                 <artifactId>rating-system-amqp-listener</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.twba</groupId>
+                <artifactId>rating-system-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
