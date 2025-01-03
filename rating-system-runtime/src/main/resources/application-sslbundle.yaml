@@ -1,0 +1,14 @@
+spring:
+  ssl:
+    bundle:
+      jks:
+        client-bundle:
+          key:
+            alias: "rating-system"
+          keystore:
+            location: ${KEYSTORE_FOLDER}/rating-system.p12
+            password: ${KEY_STORE_PASSWORD}
+            type: "PKCS12"
+          truststore:
+            location: ${TRUSTSTORE_FOLDER}/truststore.jks
+            password: ${TRUST_STORE_PASSWORD}

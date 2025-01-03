@@ -1,0 +1,15 @@
+spring:
+  ssl:
+    bundle:
+      jks:
+        course-management-server:
+          keystore:
+            location: ${KEYSTORE_FOLDER}/course-management.p12
+            password: ${PRIVATE_KEY_PASSWORD}
+            type: "PKCS12"
+          truststore:
+            location: ${TRUSTSTORE_FOLDER}/truststore.jks
+            password: ${TRUST_STORE_PASSWORD}
+server:
+  ssl:
+    bundle: "course-management-server"

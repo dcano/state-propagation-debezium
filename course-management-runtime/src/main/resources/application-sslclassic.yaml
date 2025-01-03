@@ -1,0 +1,8 @@
+server:
+  ssl:
+    key-store: ${KEYSTORE_FOLDER}/keystore-course-management.jks
+    key-store-password: ${KEY_STORE_PASSWORD}
+    key-alias: course-management
+    key-password: ${PRIVATE_KEY_PASSWORD}
+    trust-store: ${TRUSTSTORE_FOLDER}/truststore.jks
+    trust-store-password: ${TRUST_STORE_PASSWORD}
