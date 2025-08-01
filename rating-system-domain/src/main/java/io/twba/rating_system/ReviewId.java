@@ -1,4 +1,8 @@
 package io.twba.rating_system;
 
-public record ReviewId() {
+record ReviewId(String id) {
+
+    static ReviewId of(String id) {
+        return new ReviewId(id);
+    }
 }
