@@ -31,7 +31,7 @@ class CourseReview extends Entity implements EventSourced<CourseReview> {
         this.tenantId = tenantId;
     }
 
-    CourseReview(Long version) {
+    private CourseReview(Long version) {
         super(version);
     }
 
@@ -57,6 +57,10 @@ class CourseReview extends Entity implements EventSourced<CourseReview> {
                 courseReview.reviewId));
 
         return courseReview;
+    }
+
+    static CourseReview from(List<Event<DomainEventPayload>> events) {
+        return new CourseReview((long)events.size()).hydrateFrom(events);
     }
 
     @Override
