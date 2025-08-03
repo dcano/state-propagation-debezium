@@ -1,15 +1,21 @@
 package io.twba.rating_system;
 
+import io.twba.tk.core.DomainEventPayload;
 import io.twba.tk.core.Entity;
+import io.twba.tk.core.Event;
 import io.twba.tk.core.TenantId;
+import io.twba.tk.eventsource.EventSourced;
 import lombok.AccessLevel;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 
 @Getter(AccessLevel.PACKAGE)
-class CourseReview  extends Entity {
+class CourseReview extends Entity implements EventSourced<CourseReview> {
     private ReviewId reviewId;
     private RatingSummary ratingSummary;
     private CourseId courseId;
@@ -17,6 +23,15 @@ class CourseReview  extends Entity {
     private TenantId tenantId;
 
     private CourseReview(ReviewId reviewId, RatingSummary ratingSummary, CourseId courseId, AverageRating averageRating, TenantId tenantId, Long version) {
+        super(version);
+        this.reviewId = reviewId;
+        this.ratingSummary = ratingSummary;
+        this.courseId = courseId;
+        this.averageRating = averageRating;
+        this.tenantId = tenantId;
+    }
+
+    CourseReview(Long version) {
         super(version);
     }
 
@@ -44,4 +59,20 @@ class CourseReview  extends Entity {
         return courseReview;
     }
 
+    @Override
+    public CourseReview hydrateFrom(List<Event<DomainEventPayload>> events) {
+
+        return events.stream().reduce(new CourseReview((long) events.size()), (courseReview, domainEventPayloadEvent) -> {
+
+            if (domainEventPayloadEvent.getPayload() instanceof CourseReviewInitializedEvent courseReviewInitializedEvent) {
+                courseReview.courseId = new CourseId(courseReviewInitializedEvent.getCourseId());
+                courseReview.reviewId = new ReviewId(courseReviewInitializedEvent.getReviewId());
+                courseReview.ratingSummary = new RatingSummary(courseReviewInitializedEvent.getStarsRating());
+                courseReview.averageRating = new AverageRating(courseReviewInitializedEvent.getAverageNumberOfStars(), courseReviewInitializedEvent.getAverageRate(), courseReviewInitializedEvent.getTotalNumberOfReviews());
+                courseReview.tenantId = new TenantId(courseReviewInitializedEvent.getTenantId());
+            }
+
+            return courseReview;
+        }, (courseReview, courseReview2) -> courseReview2);
+    }
 }

@@ -32,6 +32,7 @@
         <module>toolkit-security-adapters</module>
         <module>rating-system-adapters</module>
         <module>rating-system-rest</module>
+        <module>rating-system-repository-event-sourced</module>
     </modules>
 
     <properties>
@@ -111,6 +112,11 @@
             <dependency>
                 <groupId>io.twba</groupId>
                 <artifactId>rating-system-adapters</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.twba</groupId>
+                <artifactId>rating-system-repository-event-sourced</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
