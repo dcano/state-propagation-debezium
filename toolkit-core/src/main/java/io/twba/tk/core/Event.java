@@ -100,7 +100,7 @@ public final class Event<T extends DomainEventPayload> implements Versionable, T
     }
 
 
-    String eventType() {
+    public String eventType() {
         return getRoutingKey().toString();
     }
 

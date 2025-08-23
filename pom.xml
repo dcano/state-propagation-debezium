@@ -33,6 +33,7 @@
         <module>rating-system-adapters</module>
         <module>rating-system-rest</module>
         <module>rating-system-repository-event-sourced</module>
+        <module>toolkit-event-store-jdbc-postgres</module>
     </modules>
 
     <properties>
@@ -142,6 +143,11 @@
             <dependency>
                 <groupId>io.twba</groupId>
                 <artifactId>rating-system-rest</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.twba</groupId>
+                <artifactId>toolkit-event-store-jdbc-postgres</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
