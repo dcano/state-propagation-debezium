@@ -36,6 +36,7 @@
         <module>toolkit-event-store-jdbc-postgres</module>
         <module>rating-system-autoconfiguration</module>
         <module>toolkit-autoconfiguration</module>
+        <module>toolkit-event-store-postgres</module>
     </modules>
 
     <properties>
