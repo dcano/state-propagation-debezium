@@ -31,3 +31,18 @@ spring:
     port: ${RABBITMQ_PORT}
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
+  datasource:
+    driver-class-name: "org.postgresql.Driver"
+    url: "jdbc:postgresql://${POSTGRES_SERVICE_NAME}:${POSTGRES_SERVICE_PORT}/${POSTGRES_DB_NAME}"
+    username: ${POSTGRES_DB_USER}
+    password: ${POSTGRES_DB_PASSWORD}
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 8
+      pool-name: "rating-system-pool"
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 0
+    schemas: db_migrations
+    out-of-order: true
+    enabled: true

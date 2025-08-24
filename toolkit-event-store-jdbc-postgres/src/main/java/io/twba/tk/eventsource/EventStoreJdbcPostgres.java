@@ -14,7 +14,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-class EventStoreJdbcPostgres implements EventStore {
+public class EventStoreJdbcPostgres implements EventStore {
 
     private static final String INSERT_EVENT_SQL = """
         INSERT INTO event_sourcing_schema.event_store (
