@@ -11,8 +11,6 @@ import lombok.Getter;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 
 @Getter(AccessLevel.PACKAGE)
 class CourseReview extends Entity implements EventSourced<CourseReview> {

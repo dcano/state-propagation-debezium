@@ -1,9 +1,12 @@
 package io.twba.tk.core;
 
+import lombok.Getter;
+
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
+@Getter
 public abstract class DomainEventPayload implements Partitionable {
 
     /**
@@ -21,28 +24,20 @@ public abstract class DomainEventPayload implements Partitionable {
      */
     private final String tenantId;
 
-    public DomainEventPayload(String tenantId) {
+    protected DomainEventPayload(String tenantId) {
         this.occurredOn = Instant.now();
         this.eventUid = UUID.randomUUID().toString();
         this.tenantId = tenantId;
     }
 
-    public DomainEventPayload(Instant occurredOn, String eventUid, String tenantId) {
+    protected DomainEventPayload() {
+        this(null);
+    }
+
+    protected DomainEventPayload(Instant occurredOn, String eventUid, String tenantId) {
         this.occurredOn = occurredOn;
         this.eventUid = eventUid;
         this.tenantId = tenantId;
-    }
-
-    public Instant getOccurredOn() {
-        return occurredOn;
-    }
-
-    public String getEventUid() {
-        return eventUid;
-    }
-
-    public String getTenantId() {
-        return tenantId;
     }
 
     @Override

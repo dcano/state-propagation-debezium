@@ -15,4 +15,11 @@ public class RatingSystemAutoconfiguration {
         return new CourseReviewRepositoryEventSourced(eventStore);
     }
 
+    @ConditionalOnMissingBean
+    @Bean
+    ReviewEntryRepository reviewEntryRepository(@Autowired EventStore eventStore) {
+        return new ReviewEntryRepositoryEventSourced(eventStore);
+    }
+
+
 }

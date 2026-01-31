@@ -7,6 +7,13 @@ management:
       exposure:
         include: prometheus, health, flyway, info
 
+io:
+  twba:
+    tk:
+      properties:
+        event-sourcing:
+          type: postgres
+
 twba:
   application:
     name: "rating-system"
