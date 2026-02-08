@@ -38,6 +38,12 @@ public final class Event<T extends DomainEventPayload> implements Versionable, T
         this.payload = payload;
         this.header.put(ROUTING_KEY, routingKey.toString());
         this.header.put(PARTITION_KEY, payload.partitionKey());
+        if(!header.containsKey(AGGREGATE_TYPE)) {
+            this.header.put(AGGREGATE_TYPE, payload.getClass().getSimpleName());
+        }
+        if(!header.containsKey(AGGREGATE_ID)) {
+            this.header.put(AGGREGATE_ID, "unknown");
+        }
     }
 
 
@@ -92,6 +98,9 @@ public final class Event<T extends DomainEventPayload> implements Versionable, T
     }
 
     public long getEventStreamVersion() {
+        if(!header.containsKey(EVENT_STREAM_VERSION)) {
+            return 0L;
+        }
         return (Long)header.get(EVENT_STREAM_VERSION);
     }
 

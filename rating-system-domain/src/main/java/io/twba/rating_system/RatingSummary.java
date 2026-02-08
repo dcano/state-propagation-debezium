@@ -16,32 +16,32 @@ record RatingSummary(List<StarRating> stars) {
         ));
     }
 
-    void addZero() {
+    void rateZero() {
         StarRating current = stars.getFirst();
         stars.set(0, StarRating.of(Stars.NONE, current.numberOfVotes()+1));
     }
 
-    void addOne() {
+    void rateOne() {
         StarRating current = stars.get(1);
         stars.set(1, StarRating.of(Stars.ONE, current.numberOfVotes()+1));
     }
 
-    void addTwo() {
+    void rateTwo() {
         StarRating current = stars.get(1);
         stars.set(2, StarRating.of(Stars.TWO, current.numberOfVotes()+1));
     }
 
-    void addThree() {
+    void rateThree() {
         StarRating current = stars.get(1);
         stars.set(3, StarRating.of(Stars.THREE, current.numberOfVotes()+1));
     }
 
-    void addFour() {
+    void rateFour() {
         StarRating current = stars.get(1);
         stars.set(4, StarRating.of(Stars.FOUR, current.numberOfVotes()+1));
     }
 
-    void addFive() {
+    void rateFive() {
         StarRating current = stars.get(4);
         stars.set(5, StarRating.of(Stars.FIVE, current.numberOfVotes()+1));
     }

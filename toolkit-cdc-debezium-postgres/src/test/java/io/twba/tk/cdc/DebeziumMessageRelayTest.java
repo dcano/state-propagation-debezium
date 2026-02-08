@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -49,9 +50,9 @@ public class DebeziumMessageRelayTest {
     @TempDir
     private static Path offsetPath;
 
-    private boolean debeziumEngineStarted = false;
-    private boolean recordProcessed = false;
-    private boolean debeziumEngineStopped = false;
+    private AtomicBoolean debeziumEngineStarted = new AtomicBoolean(false);
+    private AtomicBoolean recordProcessed = new AtomicBoolean(false);
+    private AtomicBoolean debeziumEngineStopped = new AtomicBoolean(false);
     private CdcRecord capturedCdc;
 
     @Container
@@ -93,17 +94,17 @@ public class DebeziumMessageRelayTest {
         initialize();
         debeziumMessageRelay = new DebeziumMessageRelay(debeziumProperties, cdcRecord -> {
             assertNotNull(cdcRecord);
-            recordProcessed = true;
+            recordProcessed.set(true);
             capturedCdc = cdcRecord;
         }, new DebeziumEngine.ConnectorCallback() {
             @Override
             public void pollingStarted() {
-                debeziumEngineStarted = true;
+                debeziumEngineStarted.set(true);
             }
 
             @Override
             public void connectorStopped() {
-                debeziumEngineStopped = true;
+                debeziumEngineStopped.set(true);
             }
         });
     }
@@ -113,10 +114,15 @@ public class DebeziumMessageRelayTest {
         debeziumMessageRelay.start();
         Awaitility.await()
                 .atMost(10, TimeUnit.SECONDS)
-                .until(() -> debeziumEngineStarted);
+                .until(() -> debeziumEngineStarted.get());
         debeziumMessageRelay.stop();
-        assertTrue(debeziumEngineStarted &&
-                debeziumEngineStopped);
+
+        Awaitility.await()
+                .atMost(10, TimeUnit.SECONDS)
+                .until(() -> debeziumEngineStopped.get());
+
+        assertTrue(debeziumEngineStarted.get() &&
+                debeziumEngineStopped.get());
     }
 
     @Test
@@ -127,9 +133,9 @@ public class DebeziumMessageRelayTest {
         log.info("Record added, waiting");
         Awaitility.await()
                 .atMost(20, TimeUnit.SECONDS)
-                .until(() -> recordProcessed);
+                .until(() -> recordProcessed.get());
         debeziumMessageRelay.stop();
-        assertTrue(recordProcessed);
+        assertTrue(recordProcessed.get());
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat((String)capturedCdc.valueOf("uuid")).as("Expected uuid").isEqualTo(expected.get("uuid"));
         softly.assertThat((String)capturedCdc.valueOf("payload")).as("Expected payload").isEqualTo(expected.get("payload"));
@@ -141,6 +147,7 @@ public class DebeziumMessageRelayTest {
         softly.assertThat(String.valueOf((Integer)capturedCdc.valueOf("partition"))).as("Expected partition").isEqualTo(expected.get("partition"));
         softly.assertThat((String)capturedCdc.valueOf("source")).as("Expected source").isEqualTo(expected.get("source"));
         softly.assertThat((String)capturedCdc.valueOf("correlation_id")).as("Expected correlation_id").isEqualTo(expected.get("correlation_id"));
+        softly.assertAll();
     }
 
     private Map<String, String> addRandomRecord() {

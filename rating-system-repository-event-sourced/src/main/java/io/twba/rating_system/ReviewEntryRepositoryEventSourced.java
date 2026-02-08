@@ -12,7 +12,7 @@ class ReviewEntryRepositoryEventSourced implements ReviewEntryRepository {
 
     @Override
     public void save(ReviewEntry reviewEntry) {
-        eventStore.appendEventEvents(reviewEntry.getDomainEvents());
+        eventStore.appendEvents(reviewEntry.getDomainEvents());
     }
 
     @Override

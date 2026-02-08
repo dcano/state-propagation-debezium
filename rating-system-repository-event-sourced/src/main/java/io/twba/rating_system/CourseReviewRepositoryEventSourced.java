@@ -12,7 +12,7 @@ class CourseReviewRepositoryEventSourced implements CourseReviewRepository {
 
     @Override
     public void save(CourseReview review) {
-        eventStore.appendEventEvents(review.getDomainEvents());
+        eventStore.appendEvents(review.getDomainEvents());
     }
 
     @Override

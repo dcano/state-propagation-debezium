@@ -16,7 +16,7 @@ class ReviewEntryTitleUpdatedEvent extends DomainEventPayload {
 
     ReviewEntryTitleUpdatedEvent(Title title, ReviewEntryId reviewEntryId, Instant updatedAt, CourseId courseId) {
         super();
-        this.title = title.toString();
+        this.title = title.value();
         this.reviewEntryId = reviewEntryId.id();
         this.updatedAt = updatedAt;
         this.courseId = courseId.id();

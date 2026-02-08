@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface EventStore {
 
-    void appendEventEvents(List<Event<? extends DomainEventPayload>> event);
+    void appendEvents(List<Event<? extends DomainEventPayload>> event);
     List<Event<DomainEventPayload>> retrieveEventsFor(String aggregateType, String aggregateId);
 }
