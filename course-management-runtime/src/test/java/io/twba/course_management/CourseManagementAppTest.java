@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CourseManagementAppTest {
 
     @Container
-    public static PostgreSQLContainer container = new PostgreSQLContainer("postgres:latest")
+    public static PostgreSQLContainer<?> container = new PostgreSQLContainer("postgres:latest")
             .withDatabaseName("courses_db")
             .withUsername("sa")
             .withPassword("sa");
