@@ -1,7 +1,10 @@
 package io.twba.tk.cdc;
 
 
+import io.debezium.engine.DebeziumEngine;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.api.SoftAssertions;
+import org.awaitility.Awaitility;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,9 +29,9 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -46,7 +49,10 @@ public class DebeziumMessageRelayTest {
     @TempDir
     private static Path offsetPath;
 
-    CountDownLatch countDownLatch;
+    private boolean debeziumEngineStarted = false;
+    private boolean recordProcessed = false;
+    private boolean debeziumEngineStopped = false;
+    private CdcRecord capturedCdc;
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
@@ -87,39 +93,68 @@ public class DebeziumMessageRelayTest {
         initialize();
         debeziumMessageRelay = new DebeziumMessageRelay(debeziumProperties, cdcRecord -> {
             assertNotNull(cdcRecord);
-            countDownLatch.countDown();
+            recordProcessed = true;
+            capturedCdc = cdcRecord;
+        }, new DebeziumEngine.ConnectorCallback() {
+            @Override
+            public void pollingStarted() {
+                debeziumEngineStarted = true;
+            }
+
+            @Override
+            public void connectorStopped() {
+                debeziumEngineStopped = true;
+            }
         });
     }
 
     @Test
     public void shouldInitializeTestRuntime() throws IOException {
-        assertTrue( true);
         debeziumMessageRelay.start();
+        Awaitility.await()
+                .atMost(10, TimeUnit.SECONDS)
+                .until(() -> debeziumEngineStarted);
         debeziumMessageRelay.stop();
+        assertTrue(debeziumEngineStarted &&
+                debeziumEngineStopped);
     }
 
     @Test
-    public void whenAddingRecordsThenCDC() throws InterruptedException, IOException {
-        countDownLatch = new CountDownLatch(1);
+    public void whenAddingRecordsThenCDC() throws IOException {
         debeziumMessageRelay.start();
         log.info("Adding record");
-        Map<String, String> record = addRandomRecord(); //TODO assert stuff against the "record"
+        Map<String, String> expected = addRandomRecord();
         log.info("Record added, waiting");
-        countDownLatch.await(10000, TimeUnit.MILLISECONDS);
+        Awaitility.await()
+                .atMost(20, TimeUnit.SECONDS)
+                .until(() -> recordProcessed);
+        debeziumMessageRelay.stop();
+        assertTrue(recordProcessed);
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat((String)capturedCdc.valueOf("uuid")).as("Expected uuid").isEqualTo(expected.get("uuid"));
+        softly.assertThat((String)capturedCdc.valueOf("payload")).as("Expected payload").isEqualTo(expected.get("payload"));
+        softly.assertThat((String)capturedCdc.valueOf("type")).as("Expected type").isEqualTo(expected.get("type"));
+        softly.assertThat((String)capturedCdc.valueOf("tenant_id")).as("Expected tenant_id").isEqualTo(expected.get("tenant_id"));
+        softly.assertThat((String)capturedCdc.valueOf("aggregate_id")).as("Expected aggregate_id").isEqualTo(expected.get("aggregate_id"));
+        softly.assertThat(String.valueOf((Long)capturedCdc.valueOf("epoch"))).as("Expected epoch").isEqualTo(expected.get("epoch"));
+        softly.assertThat((String)capturedCdc.valueOf("partition_key")).as("Expected partition_key").isEqualTo(expected.get("partition_key"));
+        softly.assertThat(String.valueOf((Integer)capturedCdc.valueOf("partition"))).as("Expected partition").isEqualTo(expected.get("partition"));
+        softly.assertThat((String)capturedCdc.valueOf("source")).as("Expected source").isEqualTo(expected.get("source"));
+        softly.assertThat((String)capturedCdc.valueOf("correlation_id")).as("Expected correlation_id").isEqualTo(expected.get("correlation_id"));
     }
 
     private Map<String, String> addRandomRecord() {
         Map<String, String> record = new HashMap<>();
         record.put("uuid", UUID.randomUUID().toString());
-        record.put("payload", RandomStringUtils.randomAlphabetic(10));
-        record.put("type", RandomStringUtils.randomAlphabetic(10));
-        record.put("tenant_id", RandomStringUtils.randomAlphabetic(10));
-        record.put("aggregate_id", RandomStringUtils.randomAlphabetic(10));
+        record.put("payload", RandomStringUtils.secure().nextAlphabetic(10));
+        record.put("type", RandomStringUtils.secure().nextAlphabetic(10));
+        record.put("tenant_id", RandomStringUtils.secure().nextAlphabetic(10));
+        record.put("aggregate_id", RandomStringUtils.secure().nextAlphabetic(10));
         record.put("epoch", String.valueOf(Instant.now().toEpochMilli()));
-        record.put("partition_key", RandomStringUtils.randomAlphabetic(10));
+        record.put("partition_key", RandomStringUtils.secure().nextAlphabetic(10));
         record.put("partition", "1");
-        record.put("source", RandomStringUtils.randomAlphabetic(10));
-        record.put("correlation_id", RandomStringUtils.randomAlphabetic(10));
+        record.put("source", RandomStringUtils.secure().nextAlphabetic(10));
+        record.put("correlation_id", RandomStringUtils.secure().nextAlphabetic(10));
         try (Connection conn = getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
              PreparedStatement pst = conn.prepareStatement("insert into test_schema.test_table(uuid, payload, type, tenant_id, aggregate_id, epoch, partition_key, partition, source, correlation_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             pst.setString(1, record.get("uuid"));

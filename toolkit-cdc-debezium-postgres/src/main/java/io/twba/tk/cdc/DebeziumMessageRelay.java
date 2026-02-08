@@ -25,8 +25,27 @@ public class DebeziumMessageRelay implements MessageRelay {
 
     public DebeziumMessageRelay(DebeziumProperties debeziumProperties,
                                 CdcRecordChangeConsumer recordChangeConsumer) {
+
+        this(debeziumProperties, recordChangeConsumer, new DebeziumEngine.ConnectorCallback() {
+            @Override
+            public void connectorStarted() {
+                log.info("Debezium connector started");
+            }
+
+            @Override
+            public void connectorStopped() {
+                log.info("Debezium connector stopped");
+            }
+        });
+
+    }
+
+    public DebeziumMessageRelay(DebeziumProperties debeziumProperties,
+                                CdcRecordChangeConsumer recordChangeConsumer,
+                                DebeziumEngine.ConnectorCallback connectorCallback) {
         this.debeziumEngine = DebeziumEngine.create(ChangeEventFormat.of(Connect.class))
                 .using(DebeziumConfigurationProvider.outboxConnectorConfig(debeziumProperties).asProperties())
+                .using(connectorCallback) //add connector callback to control connector state
                 .notifying(this::handleChangeEvent)
                 .build();
         this.recordChangeConsumer = recordChangeConsumer;
