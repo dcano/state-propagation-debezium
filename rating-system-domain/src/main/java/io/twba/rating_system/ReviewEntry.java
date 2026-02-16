@@ -11,6 +11,7 @@ import lombok.Getter;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Getter(AccessLevel.PACKAGE)
@@ -63,7 +64,7 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
     }
 
     static ReviewEntry from(List<Event<DomainEventPayload>> events) {
-        return new ReviewEntry((long)events.size()).hydrateFrom(events);
+        return new ReviewEntry((long)events.size()).hydrateFrom(events).orElseThrow(() -> new RuntimeException("Failed to hydrate review entry"));
     }
 
     static ReviewEntry createNew(EntryAuthor author, Review review, CourseId courseId, Title title) {
@@ -82,8 +83,8 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
     }
 
     @Override
-    public ReviewEntry hydrateFrom(List<Event<DomainEventPayload>> events) {
-        return events.stream().reduce(new ReviewEntry((long) events.size()), (reviewEntry, domainEventPayloadEvent) -> {
+    public Optional<ReviewEntry> hydrateFrom(List<Event<DomainEventPayload>> events) {
+        return Optional.of(events.stream().reduce(new ReviewEntry((long) events.size()), (reviewEntry, domainEventPayloadEvent) -> {
 
             if (domainEventPayloadEvent.getPayload() instanceof ReviewEntryCreatedEvent event) {
                 reviewEntry.courseId = new CourseId(event.getCourseId());
@@ -98,7 +99,7 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
                 reviewEntry.entryUpdateTime = event.getUpdatedAt();
             }
 
-            return reviewEntry;
-        }, (courseReview, courseReview2) -> courseReview2);
+            return  reviewEntry;
+        }, (courseReview, courseReview2) -> courseReview2));
     }
 }
