@@ -19,7 +19,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.NoSuchElementException;
 
 import static io.twba.tk.cdc.outbox.OutboxMessages.randomOutboxMessage;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Testcontainers
 @ContextConfiguration(classes = {PersistenceConfigOutbox.class, TestAppConfig.class})

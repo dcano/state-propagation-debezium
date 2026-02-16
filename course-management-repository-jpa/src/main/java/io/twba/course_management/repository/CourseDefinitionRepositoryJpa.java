@@ -5,7 +5,17 @@ import io.twba.course_management.repository.db.CourseDefinitionJpaHelper;
 import io.twba.course_management.repository.db.CourseDurationJpa;
 import io.twba.tk.core.AppendEvents;
 import io.twba.tk.core.TenantId;
-import io.twba.course_management.*;
+import io.twba.course_management.CourseDates;
+import io.twba.course_management.CourseDefinition;
+import io.twba.course_management.CourseDefinitionRepository;
+import io.twba.course_management.CourseDescription;
+import io.twba.course_management.CourseDuration;
+import io.twba.course_management.CourseId;
+import io.twba.course_management.CourseObjective;
+import io.twba.course_management.CourseStatus;
+import io.twba.course_management.CourseTitle;
+import io.twba.course_management.PreRequirement;
+import io.twba.course_management.TeacherId;
 
 import java.util.Arrays;
 import java.util.Objects;

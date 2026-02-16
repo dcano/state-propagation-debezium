@@ -1,6 +1,12 @@
 package io.twba.tk.cdc.message_relay.config;
 
-import io.twba.tk.cdc.*;
+import io.twba.tk.cdc.CdcRecordChangeConsumer;
+import io.twba.tk.cdc.CloudEventRecordChangeConsumer;
+import io.twba.tk.cdc.DebeziumMessageRelay;
+import io.twba.tk.cdc.DebeziumProperties;
+import io.twba.tk.cdc.MessagePublisher;
+import io.twba.tk.cdc.MessagePublisherRabbitMq;
+import io.twba.tk.cdc.MessageRelay;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;

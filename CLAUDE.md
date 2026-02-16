@@ -94,6 +94,10 @@ REST Controller → CommandBus.push(command)
 - Tests use `@ActiveProfiles({"postgres", "unsafe"})` and `@DynamicPropertySource` for container config
 - Key integration tests: `CourseManagementAppTest`, `DebeziumMessageRelayTest`
 
+## Coding Conventions
+
+- **No wildcard imports**: Never use `import foo.*` or `import static foo.*`. Always use fully qualified, explicit imports.
+
 ## Key Dependencies
 
 Spring Boot 3.5.10, Debezium 3.4.1.Final, PostgreSQL 16 (logical decoding), RabbitMQ 3.13.1, Flyway 11.20.3, Hypersistence Utils, Lombok, Jackson
