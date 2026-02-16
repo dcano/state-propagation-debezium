@@ -9,6 +9,7 @@ import io.twba.course_management.*;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CourseDefinitionRepositoryJpa implements CourseDefinitionRepository {
@@ -32,6 +33,18 @@ public class CourseDefinitionRepositoryJpa implements CourseDefinitionRepository
         }
         CourseDefinitionJpa courseDefinitionJpa = toJpa(courseDefinition);
         return toDomain(helper.save(courseDefinitionJpa));
+    }
+
+    @Override
+    public Optional<CourseDefinition> findById(CourseId courseId, TenantId tenantId) {
+        CourseDefinitionJpa jpa = helper.findCourseDefinitionJpaByIdAndTenantId(courseId.value(), tenantId.value());
+        return Optional.ofNullable(toDomain(jpa));
+    }
+
+    @AppendEvents
+    @Override
+    public void delete(CourseDefinition courseDefinition) {
+        helper.deleteById(courseDefinition.getId().value());
     }
 
     private CourseDefinition toDomain(CourseDefinitionJpa courseDefinitionJpa) {

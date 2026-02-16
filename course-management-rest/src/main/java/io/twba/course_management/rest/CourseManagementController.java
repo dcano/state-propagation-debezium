@@ -1,7 +1,9 @@
 package io.twba.course_management.rest;
 
 import io.twba.course_management.CourseView;
+import io.twba.course_management.DeleteCourseDefinitionCommand;
 import io.twba.course_management.rest.mapper.CourseManagementRequestMappers;
+import io.twba.course_management.rest.mapper.CreateCourseDefinitionRequestMapper;
 import io.twba.tk.command.CommandBus;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,13 @@ public class CourseManagementController {
         commandBus.push(command);
     }
 
+
+    @DeleteMapping(value = "/course/{courseId}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void deleteCourse(@PathVariable("courseId") String courseId) {
+        var command = new DeleteCourseDefinitionCommand(courseId, CreateCourseDefinitionRequestMapper.TENANT_ID);
+        commandBus.push(command);
+    }
 
     @PreAuthorize("hasAuthority('READ')")
     @GetMapping(value = "/course/{courseId}")
