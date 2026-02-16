@@ -8,6 +8,8 @@ Reference implementation for **consistent state propagation between microservice
 
 ## Build & Test Commands
 
+When expanding wildcard imports or making bulk code style changes across Java files, process ALL files in a single pass before committing. Do not verify compilation module-by-module; instead compile the whole project at once with `mvn compile` or equivalent.
+
 ```bash
 # Build everything (Java 21, Maven 3.9.6+ required)
 ./mvnw clean install
@@ -101,3 +103,7 @@ REST Controller → CommandBus.push(command)
 ## Key Dependencies
 
 Spring Boot 3.5.10, Debezium 3.4.1.Final, PostgreSQL 16 (logical decoding), RabbitMQ 3.13.1, Flyway 11.20.3, Hypersistence Utils, Lombok, Jackson
+
+## Workflow
+
+After making code style, refactoring changes or new implementations, always update CLAUDE.md to reflect any new conventions established.
