@@ -35,6 +35,11 @@ public class CourseDefinition extends MultiTenantEntity {
         return id.value();
     }
 
+    public void delete() {
+        var courseDefinitionDeletedEvent = CourseDefinitionDeletedEvent.triggeredFrom(this);
+        record(courseDefinitionDeletedEvent);
+    }
+
     public static CourseDefinitionBuilder builder(TenantId tenantId) {
         return new CourseDefinitionBuilder(tenantId);
     }

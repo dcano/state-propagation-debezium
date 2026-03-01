@@ -3,7 +3,6 @@ package io.twba.rating_system;
 import io.twba.tk.core.DomainEventPayload;
 import io.twba.tk.core.Entity;
 import io.twba.tk.core.Event;
-import io.twba.tk.core.TenantId;
 import io.twba.tk.eventsource.EventSourced;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,6 +10,7 @@ import lombok.Getter;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Getter(AccessLevel.PACKAGE)
@@ -46,13 +46,10 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
         this.title = title;
     }
 
-    private ReviewEntry() {
-        super(null);
-    }
 
     @Override
     public String aggregateId() {
-        return reviewEntryId.id();
+        return courseId.id() + ":" + author.userName();
     }
 
     void updateTitle(Title title) {
@@ -62,11 +59,23 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
         }
     }
 
-    static ReviewEntry from(List<Event<DomainEventPayload>> events) {
-        return new ReviewEntry((long)events.size()).hydrateFrom(events);
+    void updateReview(Review review) {
+        if(!Objects.equals(this.review, review)) {
+            this.review = review;
+            this.record(new ReviewUpdatedEvent(review, reviewEntryId, Instant.now(), courseId));
+        }
     }
 
-    static ReviewEntry createNew(EntryAuthor author, Review review, CourseId courseId, Title title) {
+    static ReviewEntry from(List<Event<DomainEventPayload>> events) {
+        return new ReviewEntry((long)events.size()).hydrateFrom(events).orElseThrow(() -> new RuntimeException("Failed to hydrate review entry"));
+    }
+
+    static ReviewEntry createNew(EntryAuthor author, Review review, CourseId courseId, Title title, ReviewEntryCreationService reviewEntryCreationService) {
+
+        if(reviewEntryCreationService.existsForAuthorAndCourse(author, courseId)) {
+            throw new ReviewEntryAlreadyExistsForCourseAndUser(courseId, author);
+        }
+
         ReviewEntry reviewEntry = new ReviewEntry(ReviewEntryId.of(UUID.randomUUID().toString()),
                 Instant.now(),
                 Instant.now(),
@@ -76,14 +85,24 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
                 title,
                 null);
 
-        reviewEntry.record(new ReviewEntryCreatedEvent(reviewEntry.getReviewEntryId(), reviewEntry.entryCreationTime, reviewEntry.getEntryUpdateTime(), reviewEntry.author, reviewEntry.getReview(), reviewEntry.getCourseId(), reviewEntry.getTitle()));
-
+        reviewEntry.record(new ReviewEntryCreatedEvent(reviewEntry.getReviewEntryId(),
+                reviewEntry.entryCreationTime,
+                reviewEntry.getEntryUpdateTime(),
+                reviewEntry.author,
+                reviewEntry.getReview(),
+                reviewEntry.getCourseId(),
+                reviewEntry.getTitle()));
         return reviewEntry;
     }
 
     @Override
-    public ReviewEntry hydrateFrom(List<Event<DomainEventPayload>> events) {
-        return events.stream().reduce(new ReviewEntry((long) events.size()), (reviewEntry, domainEventPayloadEvent) -> {
+    public Optional<ReviewEntry> hydrateFrom(List<Event<DomainEventPayload>> events) {
+
+        if(Objects.isNull(events) || events.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(events.stream().reduce(new ReviewEntry((long) events.size()), (reviewEntry, domainEventPayloadEvent) -> {
 
             if (domainEventPayloadEvent.getPayload() instanceof ReviewEntryCreatedEvent event) {
                 reviewEntry.courseId = new CourseId(event.getCourseId());
@@ -96,9 +115,12 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
             } else if(domainEventPayloadEvent.getPayload() instanceof ReviewEntryTitleUpdatedEvent event) {
                 reviewEntry.title = new Title(event.getTitle());
                 reviewEntry.entryUpdateTime = event.getUpdatedAt();
+            } else if(domainEventPayloadEvent.getPayload() instanceof ReviewUpdatedEvent event) {
+                reviewEntry.review = new Review(event.getReview().stars(), event.getReview().comment());
+                reviewEntry.entryUpdateTime = event.getUpdatedAt();
             }
 
-            return reviewEntry;
-        }, (courseReview, courseReview2) -> courseReview2);
+            return  reviewEntry;
+        }, (courseReview, courseReview2) -> courseReview2));
     }
 }

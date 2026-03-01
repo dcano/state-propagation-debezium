@@ -4,9 +4,12 @@ import io.twba.course_management.CourseDefinition;
 import io.twba.course_management.CourseDefinitionRepository;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static io.twba.course_management.repository.CourseDefinitions.randomNewCourseDefinition;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class CourseDefinitionRepositoryTest {
@@ -24,6 +27,36 @@ public class CourseDefinitionRepositoryTest {
                 () -> assertEquals(expected.getId(), actual.getId(), "should match ids")
         );
 
+    }
+
+    @Test
+    public void shouldDeleteExistingCourseDefinition() {
+        CourseDefinition expected = randomNewCourseDefinition();
+        CourseDefinition saved = courseDefinitionRepository.save(expected);
+
+        saved.delete();
+        courseDefinitionRepository.delete(saved);
+
+        Optional<CourseDefinition> result = courseDefinitionRepository.findById(expected.getId(), expected.getTenantId());
+        assertTrue(result.isEmpty(), "should not find deleted course definition");
+    }
+
+    @Test
+    public void shouldFindExistingCourseDefinitionById() {
+        CourseDefinition expected = randomNewCourseDefinition();
+        CourseDefinition saved = courseDefinitionRepository.save(expected);
+
+        Optional<CourseDefinition> result = courseDefinitionRepository.findById(saved.getId(), saved.getTenantId());
+        assertTrue(result.isPresent(), "should find existing course definition");
+        assertEquals(saved.getId(), result.get().getId(), "should match ids");
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenCourseDefinitionNotFound() {
+        Optional<CourseDefinition> result = courseDefinitionRepository.findById(
+                io.twba.course_management.CourseId.of("non-existent"),
+                io.twba.tk.core.TenantId.of("non-existent"));
+        assertTrue(result.isEmpty(), "should return empty for non-existent course");
     }
 
     @Test

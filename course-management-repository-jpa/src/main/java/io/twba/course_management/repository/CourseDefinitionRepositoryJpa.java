@@ -5,10 +5,21 @@ import io.twba.course_management.repository.db.CourseDefinitionJpaHelper;
 import io.twba.course_management.repository.db.CourseDurationJpa;
 import io.twba.tk.core.AppendEvents;
 import io.twba.tk.core.TenantId;
-import io.twba.course_management.*;
+import io.twba.course_management.CourseDates;
+import io.twba.course_management.CourseDefinition;
+import io.twba.course_management.CourseDefinitionRepository;
+import io.twba.course_management.CourseDescription;
+import io.twba.course_management.CourseDuration;
+import io.twba.course_management.CourseId;
+import io.twba.course_management.CourseObjective;
+import io.twba.course_management.CourseStatus;
+import io.twba.course_management.CourseTitle;
+import io.twba.course_management.PreRequirement;
+import io.twba.course_management.TeacherId;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CourseDefinitionRepositoryJpa implements CourseDefinitionRepository {
@@ -32,6 +43,18 @@ public class CourseDefinitionRepositoryJpa implements CourseDefinitionRepository
         }
         CourseDefinitionJpa courseDefinitionJpa = toJpa(courseDefinition);
         return toDomain(helper.save(courseDefinitionJpa));
+    }
+
+    @Override
+    public Optional<CourseDefinition> findById(CourseId courseId, TenantId tenantId) {
+        CourseDefinitionJpa jpa = helper.findCourseDefinitionJpaByIdAndTenantId(courseId.value(), tenantId.value());
+        return Optional.ofNullable(toDomain(jpa));
+    }
+
+    @AppendEvents
+    @Override
+    public void delete(CourseDefinition courseDefinition) {
+        helper.deleteById(courseDefinition.getId().value());
     }
 
     private CourseDefinition toDomain(CourseDefinitionJpa courseDefinitionJpa) {

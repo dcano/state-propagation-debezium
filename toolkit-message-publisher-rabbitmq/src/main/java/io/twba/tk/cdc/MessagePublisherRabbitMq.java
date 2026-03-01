@@ -8,7 +8,13 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.Objects;
 
-import static io.twba.tk.event.TwbaCloudEvent.*;
+import static io.twba.tk.event.TwbaCloudEvent.CLOUD_EVENT_AMQP_BINDING_PREFIX;
+import static io.twba.tk.event.TwbaCloudEvent.CLOUD_EVENT_GENERATING_APP_NAME;
+import static io.twba.tk.event.TwbaCloudEvent.CLOUD_EVENT_PARTITION_KEY;
+import static io.twba.tk.event.TwbaCloudEvent.CLOUD_EVENT_SOURCE;
+import static io.twba.tk.event.TwbaCloudEvent.CLOUD_EVENT_SUBJECT;
+import static io.twba.tk.event.TwbaCloudEvent.CLOUD_EVENT_TENANT_ID;
+import static io.twba.tk.event.TwbaCloudEvent.CLOUD_EVENT_TIMESTAMP;
 
 public class MessagePublisherRabbitMq implements MessagePublisher {
 

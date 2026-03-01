@@ -7,13 +7,9 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
-
-import javax.sql.DataSource;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -25,8 +21,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class EventStoreJdbcPostgresTest {
@@ -34,8 +28,6 @@ public class EventStoreJdbcPostgresTest {
     public static final String DB_NAME = "test_db";
     public static final String DB_USERNAME = "sa";
     public static final String DB_PASSWORD = "sa";
-
-    private DataSource dataSource;
 
 
     @Container
@@ -64,8 +56,6 @@ public class EventStoreJdbcPostgresTest {
         String jdbcUrl = container.getJdbcUrl();
         String username = container.getUsername();
         String password = container.getPassword();
-
-
 
         // get a plain JDBC Connection from DriverManager
         try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password)) {

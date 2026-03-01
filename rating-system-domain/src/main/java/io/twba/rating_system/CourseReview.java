@@ -10,6 +10,8 @@ import lombok.Getter;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Getter(AccessLevel.PACKAGE)
@@ -58,13 +60,15 @@ class CourseReview extends Entity implements EventSourced<CourseReview> {
     }
 
     static CourseReview from(List<Event<DomainEventPayload>> events) {
-        return new CourseReview((long)events.size()).hydrateFrom(events);
+        return new CourseReview((long)events.size()).hydrateFrom(events).orElseThrow(() -> new RuntimeException("Failed to hydrate course review"));
     }
 
     @Override
-    public CourseReview hydrateFrom(List<Event<DomainEventPayload>> events) {
+    public Optional<CourseReview> hydrateFrom(List<Event<DomainEventPayload>> events) {
 
-        return events.stream().reduce(new CourseReview((long) events.size()), (courseReview, domainEventPayloadEvent) -> {
+        if(Objects.isNull(events) || events.isEmpty()) return Optional.empty();
+
+        return Optional.of(events.stream().reduce(new CourseReview((long) events.size()), (courseReview, domainEventPayloadEvent) -> {
 
             if (domainEventPayloadEvent.getPayload() instanceof CourseReviewInitializedEvent courseReviewInitializedEvent) {
                 courseReview.courseId = new CourseId(courseReviewInitializedEvent.getCourseId());
@@ -75,6 +79,6 @@ class CourseReview extends Entity implements EventSourced<CourseReview> {
             }
 
             return courseReview;
-        }, (courseReview, courseReview2) -> courseReview2);
+        }, (courseReview, courseReview2) -> courseReview2));
     }
 }

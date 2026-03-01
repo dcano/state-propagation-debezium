@@ -11,6 +11,11 @@ class CourseReviewRepositoryEventSourced implements CourseReviewRepository {
     }
 
     @Override
+    public boolean existsCourseReviewForCourse(CourseId courseId) {
+        return !eventStore.retrieveEventsFor(CourseReview.class.getSimpleName(), courseId.id()).isEmpty();
+    }
+
+    @Override
     public void save(CourseReview review) {
         eventStore.appendEvents(review.getDomainEvents());
     }

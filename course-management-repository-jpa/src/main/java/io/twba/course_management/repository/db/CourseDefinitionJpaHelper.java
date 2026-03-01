@@ -8,4 +8,6 @@ public interface CourseDefinitionJpaHelper extends JpaRepository<CourseDefinitio
 
     CourseDefinitionJpa findCourseDefinitionJpaByTenantIdAndTitle(String tenantId, String title);
 
+    CourseDefinitionJpa findCourseDefinitionJpaByIdAndTenantId(String id, String tenantId);
+
 }

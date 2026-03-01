@@ -2,6 +2,8 @@ package io.twba.rating_system;
 
 import io.twba.tk.eventsource.EventStore;
 
+import java.util.Optional;
+
 class ReviewEntryRepositoryEventSourced implements ReviewEntryRepository {
 
     private final EventStore eventStore;
@@ -16,7 +18,7 @@ class ReviewEntryRepositoryEventSourced implements ReviewEntryRepository {
     }
 
     @Override
-    public ReviewEntry retrieveEntry(ReviewEntryId reviewEntryId) {
-        return ReviewEntry.from(eventStore.retrieveEventsFor(ReviewEntry.class.getSimpleName(), reviewEntryId.id()));
+    public Optional<ReviewEntry> retrieveReviewEntryFor(EntryAuthor author, CourseId courseId) {
+        return Optional.ofNullable(ReviewEntry.from(eventStore.retrieveEventsFor(ReviewEntry.class.getSimpleName(), courseId.id() + ":" + author.userName())));
     }
 }
