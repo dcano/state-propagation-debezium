@@ -1,41 +1,113 @@
 # Demystifying Event Sourcing
 
-## The Confusion That Keeps Happening
+Event sourcing carries a reputation for being complex, exotic, and risky. Much of that reputation comes from myths — misunderstandings that make developers hesitant to adopt a pattern that accountants, banks, and ledger-based systems have relied on for centuries.
 
-Ask ten developers what "event sourcing" is and at least seven will start talking about Kafka, message brokers, or event-driven microservices. This confusion is understandable — both concepts use the word "event" — but it leads to serious architectural mistakes. Let's clear it up before going further.
-
-**Event sourcing is a persistence strategy.** It is a way to save the state of a domain entity. Nothing more. You can use event sourcing in a system that has zero message brokers, zero asynchronous communication, and zero inter-service messaging. Conversely, you can build a fully event-driven architecture without a single line of event sourcing.
-
-The conflation happens because event sourcing and event-driven architectures pair naturally together and are often introduced alongside each other in the same blog posts and conference talks. But architecturally they solve different problems. Event-driven architecture answers "how do services communicate?" Event sourcing answers "how does a service persist its aggregates?"
-
-With that out of the way, let's look at what event sourcing actually is, using a real system to ground every concept.
+This article tackles five myths directly, grounded in a real implementation: the `ReviewEntry` aggregate from a course ratings service built with event sourcing.
 
 ---
 
-## What Event Sourcing Is
+## Myth 1: "State Is the Truth"
 
-In a traditional persistence model, you save the *current state* of an entity. When something changes, you overwrite the previous state. The history is gone. This is what you do every time you issue an `UPDATE` statement.
+**The Myth:** The database row holds the true state of your entity. Overwrite it when something changes.
 
-In event sourcing, you save *the sequence of changes* that produced the current state. Each change is recorded as an immutable event. To know the current state of an entity, you replay its full event history.
+**The Reality:** A row is not the truth — it is a *summary* of past facts. When you issue an `UPDATE`, you are committing data amnesia. The answer to "what was this value three days ago?" is gone forever.
 
-The aggregate never holds mutable state in a database row. The database only holds a log of events.
+Consider how an accountant works. They do not erase yesterday's numbers when today's transaction arrives. They record a new line in the ledger, and the balance is *derived* from the full history. Event sourcing is that ledger.
 
 ```
-Traditional:  entity_table: { id: 42, status: "approved", rating: 4.2, ... }
+Traditional:  review_entries: { id: 42, title: "Great course", updated_at: "2025-01-15" }
+              (how many times was the title changed? unknown. what was it before? gone.)
 
-Event Sourced: event_store: [ CourseReviewInitialized, StarRatingAdded, StarRatingAdded, ... ]
-               (current state is derived at runtime by replaying these)
+Event Sourced: event_store: [ ReviewEntryCreatedEvent, ReviewEntryTitleUpdatedEvent, ... ]
+               (current state is derived at runtime by replaying these — history intact)
 ```
+
+In the `ReviewEntry` aggregate, no column stores the current title. The `title` field is populated during hydration by replaying events in sequence:
+
+```java
+// ReviewEntry.java — hydrateFrom
+return Optional.of(events.stream()
+    .reduce(new ReviewEntry((long) events.size()),
+        (reviewEntry, domainEventPayloadEvent) -> {
+
+            if (domainEventPayloadEvent.getPayload() instanceof ReviewEntryCreatedEvent event) {
+                reviewEntry.courseId          = new CourseId(event.getCourseId());
+                reviewEntry.reviewEntryId     = new ReviewEntryId(event.getReviewEntryId());
+                reviewEntry.title             = new Title(event.getTitle());
+                reviewEntry.author            = new EntryAuthor(event.getAuthor());
+                reviewEntry.entryCreationTime = event.getCreatedTime();
+                reviewEntry.entryUpdateTime   = event.getUpdatedTime();
+                reviewEntry.review            = event.getReview();
+
+            } else if (domainEventPayloadEvent.getPayload() instanceof ReviewEntryTitleUpdatedEvent event) {
+                reviewEntry.title           = new Title(event.getTitle());
+                reviewEntry.entryUpdateTime = event.getUpdatedAt();
+
+            } else if (domainEventPayloadEvent.getPayload() instanceof ReviewUpdatedEvent event) {
+                reviewEntry.review          = new Review(event.getReview().stars(), event.getReview().comment());
+                reviewEntry.entryUpdateTime = event.getUpdatedAt();
+            }
+
+            return reviewEntry;
+        },
+        (a, b) -> b));
+```
+
+The title you see today is the final result of every `ReviewEntryCreatedEvent` and `ReviewEntryTitleUpdatedEvent` ever recorded. The ledger is intact. The history is the truth.
 
 ---
 
-## The Rating System: A Real Implementation
+## Myth 2: "Event Sourcing and Event-Driven Architecture Are the Same Thing"
 
-The project we are examining includes a `rating-system` service that persists course reviews using event sourcing. There is no `course_reviews` table with columns for the current rating. There is only an event store.
+**The Myth:** If I use event sourcing, I am doing EDA. If I use Kafka, I am doing event sourcing.
 
-### The Core Abstraction
+**The Reality:** These are orthogonal concerns that solve different problems.
 
-The entire pattern is expressed in two small interfaces in `toolkit-core`:
+| Dimension | Event Sourcing | Event-Driven Architecture |
+|---|---|---|
+| **Scope** | Within a single service / bounded context | Between services |
+| **Purpose** | How state is **persisted** | How services **communicate** |
+| **Storage** | Append-only event store | Message broker (Kafka, RabbitMQ, etc.) |
+| **Consumer** | The same service that produced the events | Other services |
+
+The "aha" moment: you can build a fully event-sourced system that is completely synchronous and never broadcasts a single message to the outside world. Conversely, you can have a fully event-driven microservices architecture where every service uses plain `UPDATE` statements internally.
+
+The conflation happens because the two pair naturally, and they are often introduced together in the same blog posts. This project illustrates both sides independently. `ReviewEntry` uses event sourcing purely for persistence — its events never leave the service. Separately, the `CourseManagement` service publishes domain events to RabbitMQ via the Transactional Outbox. Two different problems, two different solutions, each using the word "event" for a different thing.
+
+The `ReviewEntry` repository has no knowledge of any message broker. It speaks only to an `EventStore`:
+
+```java
+// ReviewEntryRepositoryEventSourced.java
+class ReviewEntryRepositoryEventSourced implements ReviewEntryRepository {
+
+    private final EventStore eventStore;
+
+    @Override
+    public void save(ReviewEntry reviewEntry) {
+        eventStore.appendEvents(reviewEntry.getDomainEvents());
+    }
+
+    @Override
+    public Optional<ReviewEntry> retrieveReviewEntryFor(EntryAuthor author, CourseId courseId) {
+        return Optional.ofNullable(ReviewEntry.from(
+            eventStore.retrieveEventsFor(
+                ReviewEntry.class.getSimpleName(),
+                courseId.id() + ":" + author.userName())));
+    }
+}
+```
+
+Persistence. No brokers. No async. Nothing event-driven.
+
+---
+
+## How It Actually Works
+
+Before the remaining myths, a brief tour of the mechanics.
+
+### The Core Abstractions
+
+Two small interfaces in `toolkit-core` express the entire pattern:
 
 ```java
 // EventSourced.java
@@ -50,139 +122,66 @@ public interface EventStore {
 }
 ```
 
-`EventStore` is purely about persistence. `EventSourced` is purely about state reconstruction. These two concerns are deliberately separated.
+`EventSourced` handles state reconstruction. `EventStore` handles persistence. Deliberately separated.
 
-### The Aggregate
+### Recording Events
 
-`CourseReview` is the aggregate for course ratings. It implements `EventSourced<CourseReview>`:
-
-```java
-// CourseReview.java
-class CourseReview extends Entity implements EventSourced<CourseReview> {
-    private ReviewId reviewId;
-    private RatingSummary ratingSummary;
-    private CourseId courseId;
-    private AverageRating averageRating;
-    private TenantId tenantId;
-
-    static CourseReview initializeCourseReview(CourseId courseId, TenantId tenantId) {
-        CourseReview courseReview = new CourseReview(
-            ReviewId.of(UUID.randomUUID().toString()),
-            RatingSummary.initialize(),
-            courseId,
-            AverageRating.initialize(),
-            tenantId,
-            null);
-
-        // Record the event — this is the only thing that gets persisted
-        courseReview.record(new CourseReviewInitializedEvent(
-            Instant.now(),
-            UUID.randomUUID().toString(),
-            tenantId,
-            courseReview.ratingSummary,
-            courseReview.averageRating,
-            courseReview.courseId,
-            courseReview.reviewId));
-
-        return courseReview;
-    }
-```
-
-Nothing writes to a `course_reviews` table. The aggregate constructs itself, records a `CourseReviewInitializedEvent`, and that event is the thing that gets persisted.
-
-### Hydration: Reconstructing State from Events
-
-This is the heart of event sourcing. When the system needs a `CourseReview`, it fetches all events for that aggregate from the event store and replays them:
+When a business operation runs, the aggregate calls `record()` from the `Entity` base class. The event is not yet persisted — it sits in memory. When `save()` is called, the recorded events are flushed to the store:
 
 ```java
-// CourseReview.java
-@Override
-public Optional<CourseReview> hydrateFrom(List<Event<DomainEventPayload>> events) {
-    if (Objects.isNull(events) || events.isEmpty()) return Optional.empty();
-
-    return Optional.of(events.stream()
-        .reduce(new CourseReview((long) events.size()),
-            (courseReview, domainEventPayloadEvent) -> {
-
-                if (domainEventPayloadEvent.getPayload() instanceof CourseReviewInitializedEvent e) {
-                    courseReview.courseId      = new CourseId(e.getCourseId());
-                    courseReview.reviewId      = new ReviewId(e.getReviewId());
-                    courseReview.ratingSummary = new RatingSummary(e.getStarsRating());
-                    courseReview.averageRating = new AverageRating(
-                        e.getAverageNumberOfStars(),
-                        e.getAverageRate(),
-                        e.getTotalNumberOfReviews());
-                    courseReview.tenantId      = new TenantId(e.getTenantId());
-                }
-                // future events (e.g. StarRatingAddedEvent) would be handled here
-
-                return courseReview;
-            },
-            (a, b) -> b));
+// Entity.java
+protected void record(Event<? extends DomainEventPayload> event) {
+    event.setAggregateType(aggregateType());
+    event.setAggregateId(aggregateId());
+    event.setEventStreamVersion(Objects.isNull(version) ? 0 : version + events.size());
+    this.events.add(event);
 }
 ```
 
-This stream reduction is a left fold over the event log. Each event mutates the aggregate's fields — but these mutations only ever happen during reconstruction, never as a side effect of a business operation. Business operations only call `record()`.
-
-The `ReviewEntry` aggregate handles multiple event types, illustrating how state evolves:
+Here is `ReviewEntry.createNew()` — a business operation that creates the aggregate and records its first event:
 
 ```java
-// ReviewEntry.java — hydrateFrom
-return Optional.of(events.stream()
-    .reduce(new ReviewEntry((long) events.size()),
-        (reviewEntry, event) -> {
+// ReviewEntry.java
+static ReviewEntry createNew(EntryAuthor author, Review review, CourseId courseId,
+                             Title title, ReviewEntryCreationService creationService) {
 
-            if (event.getPayload() instanceof ReviewEntryCreatedEvent e) {
-                reviewEntry.courseId          = new CourseId(e.getCourseId());
-                reviewEntry.reviewEntryId     = new ReviewEntryId(e.getReviewEntryId());
-                reviewEntry.title             = new Title(e.getTitle());
-                reviewEntry.author            = new EntryAuthor(e.getAuthor());
-                reviewEntry.entryCreationTime = e.getCreatedTime();
-                reviewEntry.entryUpdateTime   = e.getUpdatedTime();
-                reviewEntry.review            = e.getReview();
+    if (creationService.existsForAuthorAndCourse(author, courseId)) {
+        throw new ReviewEntryAlreadyExistsForCourseAndUser(courseId, author);
+    }
 
-            } else if (event.getPayload() instanceof ReviewEntryTitleUpdatedEvent e) {
-                reviewEntry.title           = new Title(e.getTitle());
-                reviewEntry.entryUpdateTime = e.getUpdatedAt();
-            }
+    ReviewEntry reviewEntry = new ReviewEntry(
+        ReviewEntryId.of(UUID.randomUUID().toString()),
+        Instant.now(), Instant.now(),
+        author, review, courseId, title, null);
 
-            return reviewEntry;
-        },
-        (a, b) -> b));
+    reviewEntry.record(new ReviewEntryCreatedEvent(
+        reviewEntry.getReviewEntryId(),
+        reviewEntry.entryCreationTime,
+        reviewEntry.getEntryUpdateTime(),
+        reviewEntry.author,
+        reviewEntry.getReview(),
+        reviewEntry.getCourseId(),
+        reviewEntry.getTitle()));
+
+    return reviewEntry;
+}
 ```
 
-Notice two things. First, the initial state of `reviewEntry` has all fields null — it is a blank shell. Second, after replaying `ReviewEntryCreatedEvent` all fields are populated. After replaying `ReviewEntryTitleUpdatedEvent` only `title` and `entryUpdateTime` change. The final state is the aggregate of all mutations across time.
+Nothing writes to a table. The aggregate constructs itself, records the event, and returns. Persistence happens later via the repository.
 
-### The Repository: Where It All Connects
-
-The repository implementation is remarkably lean:
+Similarly, `updateTitle()` only records an event if the title actually changes:
 
 ```java
-// CourseReviewRepositoryEventSourced.java
-class CourseReviewRepositoryEventSourced implements CourseReviewRepository {
-
-    private final EventStore eventStore;
-
-    @Override
-    public void save(CourseReview review) {
-        eventStore.appendEvents(review.getDomainEvents());
-    }
-
-    @Override
-    public CourseReview retrieveForCourse(CourseId courseId) {
-        return CourseReview.from(
-            eventStore.retrieveEventsFor(CourseReview.class.getSimpleName(), courseId.id()));
-    }
-
-    @Override
-    public boolean existsCourseReviewForCourse(CourseId courseId) {
-        return !eventStore.retrieveEventsFor(
-            CourseReview.class.getSimpleName(), courseId.id()).isEmpty();
+// ReviewEntry.java
+void updateTitle(Title title) {
+    if (!this.title.equals(title)) {
+        this.title = title;
+        this.record(new ReviewEntryTitleUpdatedEvent(title, reviewEntryId, Instant.now(), courseId));
     }
 }
 ```
 
-`save()` does not write the aggregate's current state. It writes the *new events* the aggregate recorded since it was loaded (or created). `retrieveForCourse()` fetches all events and hydrates the aggregate. `existsCourseReviewForCourse()` checks whether any events exist for that aggregate ID — a pattern possible only because of event sourcing.
+No event, no persistence. Identical input produces no side effects.
 
 ### The Event Store: PostgreSQL as an Append-Only Log
 
@@ -205,9 +204,52 @@ private static final String SELECT_EVENTS_SQL = """
     """;
 ```
 
-Two operations. That is the entire persistence model: append events in, retrieve events out ordered by `event_stream_version`. There are no updates, no deletes, no joins.
+Two SQL operations: append events in, retrieve events out ordered by `event_stream_version`. No updates, no deletes, no joins.
 
-Deserialization uses the stored `event_class_name` to recover the exact type:
+### The Event Envelope
+
+Every event is wrapped in an `Event<T>` envelope that carries metadata alongside the payload:
+
+```java
+// Event.java (selected fields)
+public final class Event<T extends DomainEventPayload> implements Versionable, Traceable, Routable {
+
+    // Headers: CORRELATION_ID, ROUTING_KEY, VERSION, AGGREGATE_TYPE,
+    //          AGGREGATE_ID, EVENT_STREAM_VERSION, PARTITION_KEY, SOURCE
+
+    private final Map<String, Object> header;
+    private final T payload;
+```
+
+The `event_stream_version` header records each event's position within the aggregate's stream — enabling correct ordering on reconstruction and detection of concurrent writes.
+
+---
+
+## Myth 3: "Storing Every Change Forever Will Kill Performance"
+
+**The Myth:** "Storing every change will exhaust disk space and make hydration too slow to be practical."
+
+**The Reality:** For most business aggregates this concern never materialises. A `ReviewEntry` accumulates a handful of events across its lifetime: one `ReviewEntryCreatedEvent`, a few `ReviewEntryTitleUpdatedEvent`s, a few `ReviewUpdatedEvent`s. Replaying five events is instantaneous.
+
+For aggregates with genuinely long histories — financial accounts, workflow processes with thousands of transitions — the solution is well-understood: **snapshots**.
+
+A snapshot is a checkpoint. Every N events you persist the aggregate's current state. On the next load, you start from the most recent snapshot and replay only the events that arrived after it. Rehydration becomes O(k) where k is the number of events since the last checkpoint — regardless of total aggregate history length.
+
+The `event_stream_version` field already present in the event store schema makes snapshot implementation straightforward: store a snapshot at version V, and on load, fetch the snapshot at V then fetch events where `event_stream_version > V`.
+
+Introduce snapshots when profiling shows they are needed. Not before.
+
+---
+
+## Myth 4: "If I Change My Data Structure, Old Events Are Broken Forever"
+
+**The Myth:** "We cannot refactor our domain model because years of events stored in the database will fail to deserialise."
+
+**The Reality:** Events are immutable facts about what happened. You do not migrate them like a SQL table. You **upcast** them.
+
+An upcaster is a transformation function applied at read time. When the event store retrieves a raw record, an upcaster chain transforms it from its stored form (the old schema) to the form the current code expects, before `hydrateFrom` ever sees it. Old events are never touched.
+
+The current deserialisation in this project uses the stored class name to recover the exact type:
 
 ```java
 private Event<DomainEventPayload> reconstituteEvent(
@@ -224,140 +266,136 @@ private Event<DomainEventPayload> reconstituteEvent(
 }
 ```
 
-This is clean and simple — and it is also where most of the long-term complexity lives, as we will discuss shortly.
+This works cleanly, but it couples the persistence format to the package structure and class name. Three concrete strategies to handle schema evolution:
 
-### The Event Envelope
+- **Upcasting:** Insert a transformation step between raw record retrieval and `hydrateFrom`. An old `ReviewEntryCreatedEvent_v1` record is mapped to `ReviewEntryCreatedEvent` before the application sees it.
+- **Versioned event types:** Store `ReviewEntryCreatedEventV1` and `ReviewEntryCreatedEventV2` as distinct types, and handle both in the `instanceof` chain inside `hydrateFrom`.
+- **Lenient deserialisation:** Jackson's `@JsonIgnoreProperties(ignoreUnknown = true)` makes added fields backward-compatible for free. Removed fields require an explicit strategy.
 
-Every event in this system is wrapped in an `Event<T>` envelope that carries metadata alongside the payload:
-
-```java
-// Event.java (selected fields)
-public final class Event<T extends DomainEventPayload> implements Versionable, Traceable, Routable {
-
-    // Headers stored as a map:
-    // CORRELATION_ID, ROUTING_KEY, VERSION, AGGREGATE_TYPE,
-    // AGGREGATE_ID, EVENT_STREAM_VERSION, PARTITION_KEY, SOURCE
-
-    private final Map<String, Object> header;
-    private final T payload;
-```
-
-The `event_stream_version` header is critical: it records the position of each event within the aggregate's stream, making it possible to reconstruct state in the correct order and to detect concurrent writes.
+The key insight: schema migration in event sourcing is a *read-time* concern, not a *write-time* concern. History is immutable. New code learns to read old formats.
 
 ---
 
-## The Mechanics of Recording Events
+## Myth 5: "I Have to Learn CQRS Too"
 
-The `Entity` base class contains the mechanics of event recording:
+**The Myth:** "Event sourcing requires CQRS. They arrive as a package deal."
+
+**The Reality:** They are distinct patterns that pair well but neither requires the other.
+
+Event sourcing defines the **write model**: how you persist an aggregate's state changes. CQRS defines a separation between write operations (commands) and read operations (queries). They solve different problems.
+
+The practical reason they appear together: an event-sourced aggregate is not directly queryable. You cannot issue `SELECT title FROM review_entries WHERE course_id = ?` against an event store. To answer read-side questions efficiently, you project events into a read model — a denormalized, queryable view. This is the Query side of CQRS.
+
+But CQRS is not a prerequisite for getting started with event sourcing. A simple system can have an event-sourced write model and a synchronous projection that runs in the same transaction, updating a relational read table immediately. No asynchronous pipeline, no eventual consistency, no dedicated read service.
+
+The `ReviewEntry` command handler is a clean illustration of the write side:
 
 ```java
-// Entity.java
-protected void record(Event<? extends DomainEventPayload> event) {
-    event.setAggregateType(aggregateType());
-    event.setAggregateId(aggregateId());
-    event.setEventStreamVersion(Objects.isNull(version) ? 0 : version + events.size());
-    this.events.add(event);
+// CreateReviewEntryCommandHandler.java
+class CreateReviewEntryCommandHandler implements CommandHandler<CreateReviewEntryCommand> {
+
+    private final ReviewEntryRepository reviewEntryRepository;
+    private final ReviewEntryCreationService reviewEntryCreationService;
+
+    @Override
+    public void handle(CreateReviewEntryCommand command) {
+        ReviewEntry reviewEntry = ReviewEntry.createNew(
+            command.getAuthor(),
+            command.getReview(),
+            command.getCourseId(),
+            command.getTitle(),
+            reviewEntryCreationService);
+        reviewEntryRepository.save(reviewEntry);
+    }
 }
 ```
 
-When a business operation fires, the aggregate calls `record()`. The event is not yet persisted — it sits in memory in `this.events`. When the repository's `save()` method is called, it passes `getDomainEvents()` to `eventStore.appendEvents()`. The recording and the persisting are cleanly separated.
-
-This also means you can unit-test your domain logic without touching a database at all. Create an aggregate, call business methods on it, and inspect the events it recorded. The entire state machine is verifiable in-process.
+The write model knows nothing about how reads will be served. CQRS is a natural evolution as query complexity grows — not a day-one requirement.
 
 ---
 
-## Pros of Event Sourcing
+## Unit Testing Is a Free Benefit
 
-**Complete audit log by construction.** You never need to add audit tables or triggers. Every state change is recorded, immutably, as a first-class artifact. You can answer "what was the state of this course review at 3pm last Tuesday?" by replaying events up to that timestamp.
-
-**Temporal queries.** Because the full history exists, you can reconstruct any past state. `ReviewEntry.hydrateFrom(events.subList(0, n))` gives you the aggregate as it was after `n` events.
-
-**Event-driven integration is trivially available.** The events you record for persistence are the same events you can publish to a message broker. This project uses exactly that — the same domain events flow into the event store *and* through the Transactional Outbox into RabbitMQ.
-
-**No object-relational impedance mismatch for complex aggregates.** When an aggregate has deeply nested value objects and complex invariants, mapping it to a relational schema is painful. The event-sourced aggregate is stored as events — arbitrarily complex structures that serialize cleanly to JSON.
-
-**Optimistic concurrency without locking.** The `event_stream_version` provides a natural concurrency token. You append only if the version you loaded is still the current version. No pessimistic locks needed.
-
-**Unit testing is pure and fast.** The `InitializeCourseReviewCommandHandlerTest` does exactly this:
+Because aggregates record events in memory before any persistence occurs, domain logic is testable with zero infrastructure:
 
 ```java
 @Test
-public void shouldInitializeCourseReviewFromCommand() {
-    when(courseReviewRepository.existsCourseReviewForCourse(command.getCourseId()))
-        .thenReturn(false);
-    commandHandler.handle(command);
-    verify(courseReviewRepository).save(courseReviewCaptor.capture());
-    CourseReview actualCourseReview = courseReviewCaptor.getValue();
-    assertEquals(command.getCourseId(), actualCourseReview.getCourseId());
+void shouldRecordReviewEntryCreatedEventOnCreation() {
+    when(reviewEntryCreationService.existsForAuthorAndCourse(author, courseId)).thenReturn(false);
+
+    ReviewEntry entry = ReviewEntry.createNew(author, review, courseId, title, reviewEntryCreationService);
+
+    assertEquals(1, entry.getDomainEvents().size());
+    ReviewEntryCreatedEvent event = assertInstanceOf(
+        ReviewEntryCreatedEvent.class,
+        entry.getDomainEvents().get(0).getPayload());
+    assertAll("Expected ReviewEntryCreatedEvent payload",
+        () -> assertEquals(author.userName(), event.getAuthor()),
+        () -> assertEquals(courseId.id(), event.getCourseId()),
+        () -> assertEquals(review, event.getReview()),
+        () -> assertEquals(title.value(), event.getTitle()));
 }
 ```
 
-No database, no Spring context, just domain logic.
+No database. No Spring context. Pure domain logic, verified through the events it records.
+
+The hydration path is equally testable. Construct an event list directly, call `ReviewEntry.from()`, and assert on the resulting state:
+
+```java
+private ReviewEntry existingEntry() {
+    ReviewEntryCreatedEvent createdEvent = new ReviewEntryCreatedEvent(
+        new ReviewEntryId(UUID.randomUUID().toString()),
+        Instant.now(), Instant.now(),
+        author, review, courseId, title);
+    return ReviewEntry.from(List.of(new Event<>(createdEvent)));
+}
+```
+
+The aggregate's entire state machine is verifiable in-process, from creation through every mutation.
 
 ---
 
-## Cons and Real Challenges
+## Pros and Cons
 
-**Querying is not native.** An SQL query like `SELECT AVG(rating) FROM reviews WHERE course_id = ?` does not exist in an event-sourced system. To answer that question you need a read model — a separate projection, often called a "read side" or "query model" — that processes events and materializes queryable state. This is the Command Query Responsibility Segregation (CQRS) pattern, and event sourcing almost always requires it.
-
-**Event versioning is the hardest problem.** When `reconstituteEvent` calls `Class.forName(eventClassName)`, it depends entirely on the class name stored in the database matching a class that exists in the running JVM. Now consider what happens when:
-
-- `CourseReviewInitializedEvent` is renamed to `CourseReviewCreatedEvent`
-- A field is added to `ReviewEntryCreatedEvent`
-- A field is removed
-
-Events stored years ago must still be deserializable by code deployed today. The event store is not like a database schema you migrate once — it is a permanent contract with your past. Strategies include:
-
-- **Upcasting**: Transform old event formats to new ones at read time before hydration. The event store returns raw records; an upcaster chain transforms them before they reach `hydrateFrom`.
-- **Event versioning by type**: Store `ReviewEntryCreatedEventV1`, `ReviewEntryCreatedEventV2` as distinct types, and handle both in the `instanceof` chain.
-- **Schema registries**: In serialization-heavy environments, use Avro or Protobuf with a schema registry that tracks compatibility.
-
-In this project, `event_class_name` stores the fully qualified Java class name. This works well, but it couples the persistence format to the package structure. Renaming a class or moving it between packages would break deserialization of historical events without a migration strategy.
-
-**Eventual consistency in read models.** If your read model is updated asynchronously from events, there is a window where reads are stale. This is inherent to the pattern and requires the team to accept and design for eventual consistency.
-
-**Rehydration cost grows with stream length.** For aggregates with very long event histories, replaying every event to get the current state is expensive. The standard mitigation is **snapshotting**: periodically persist a snapshot of the aggregate's current state, and on load, start from the most recent snapshot instead of event zero. This adds complexity but is well understood.
-
-**Debugging requires a different mental model.** When something is wrong with an aggregate's state, you cannot just `SELECT *` and inspect a row. You need to understand the event log, the hydration logic, and potentially the upcasting pipeline. Teams need to invest in tooling to make event streams observable.
-
----
-
-## Event Sourcing vs. Event-Driven Architecture: The Summary
-
-| Dimension | Event Sourcing | Event-Driven Architecture |
-|---|---|---|
-| **Scope** | Within a single service / bounded context | Between services |
-| **Purpose** | How state is **persisted** | How services **communicate** |
-| **Primary artifact** | Events as the source of truth for an aggregate | Events as messages flowing between services |
-| **Storage** | Append-only event store | Message broker (Kafka, RabbitMQ, etc.) |
-| **Consumer** | The same service that produced the events | Other services |
-| **Optional?** | Completely independent choice | Completely independent choice |
-
-This project illustrates both sides. `CourseReview` and `ReviewEntry` use event sourcing for persistence. Those same domain events are also published to RabbitMQ via the Transactional Outbox. The two concerns use the same events but for entirely different purposes. Neither requires the other.
+| Pros | Cons |
+|---|---|
+| **Perfect audit log by construction** — every state change is immutable and timestamped | **Learning curve** — shift in mindset from CRUD |
+| **Time travel** — reconstruct any past state by replaying up to a point in time | **Eventual consistency** — asynchronous read models lag behind writes |
+| **Append-only writes are fast** — sequential inserts are the most efficient write pattern for any database | **Boilerplate** — more infrastructure code up front |
+| **No object-relational impedance mismatch** — complex aggregates serialize cleanly to JSON | **Querying requires a read model** — CQRS eventually becomes necessary for non-trivial queries |
+| **Optimistic concurrency without locking** — `event_stream_version` is a natural concurrency token | **Event versioning is a long-term commitment** — solvable, but requires sustained discipline |
 
 ---
 
 ## When to Use Event Sourcing
 
-Event sourcing is the right choice when:
+**Use it when:**
 
-- **Audit history is a first-class requirement** — finance, healthcare, compliance domains
-- **Temporal queries** are needed (what did this aggregate look like at time T?)
-- **Complex domain logic** benefits from a functional state machine model
-- **Integration via events** is already planned — the cost of the dual infrastructure is amortized
+- Audit history is a first-class requirement — finance, healthcare, compliance domains
+- Temporal queries are needed — "what did this aggregate look like at time T?"
+- Complex domain logic benefits from a functional state machine model
+- Event-driven integration is already planned — the infrastructure cost is shared
 
-It is the wrong choice when:
+**Skip it when:**
 
 - The domain is CRUD-heavy with no meaningful history (a user profile with an email address)
-- The team is small and the query-side complexity of CQRS would slow delivery unacceptably
-- Event versioning has not been thought through — this is a long-term commitment
+- The team cannot absorb the mindset shift and tooling investment right now
+- Event versioning has not been thought through — this is a permanent contract with your past
 
 ---
 
 ## Conclusion
 
-Event sourcing is a persistence pattern with a clear contract: never overwrite state, always append events, reconstruct state by replaying history. The `rating-system` in this project demonstrates the full implementation — from the `EventSourced<T>` interface to the JDBC event store to the lean repository that connects them.
+Event sourcing is not exotic and it is not inherently complex. It is a persistence strategy with a clear contract: never overwrite state, always append events, reconstruct state by replaying history. The pattern is older than computers — it is how ledgers work.
 
-Its power comes from making time a first-class dimension of your data model. Its cost comes from everything that implies: read models, event versioning, snapshot strategies, and a team willing to reason about history rather than snapshots.
+The five myths examined here are the main sources of unnecessary fear:
 
-It has nothing to do with Kafka. It has nothing to do with microservices communication. It is about what you write to the database — and that is a decision you can make independently of everything else in your architecture.
+1. **State is not the truth** — the history is. State is a transient summary.
+2. **Event sourcing and EDA are orthogonal** — pick one, both, or neither, independently.
+3. **Storage growth is manageable** — snapshots make hydration O(k), not O(n).
+4. **Schema changes are handled at read time** — immutable events plus upcasting.
+5. **CQRS is a natural evolution, not a day-one requirement.**
+
+The `ReviewEntry` aggregate in this codebase demonstrates all of this. It is a handful of files: an aggregate that calls `record()`, a repository that calls `appendEvents()`, a hydration function that is a left fold over the event log. The infrastructure is lean. The domain logic is pure. The history is intact.
+
+It has nothing to do with Kafka. It is about what you write to the database.
