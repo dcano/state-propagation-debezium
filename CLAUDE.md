@@ -100,6 +100,45 @@ REST Controller → CommandBus.push(command)
 
 - **No wildcard imports**: Never use `import foo.*` or `import static foo.*`. Always use fully qualified, explicit imports.
 
+### Domain Isolation via Package-Private Visibility
+
+All domain elements live in a **single flat package** (e.g., `io.twba.rating_system`) and are **package-private by default**. This applies to:
+
+- Aggregates and entities (`CourseReview`, `ReviewEntry`)
+- Value objects (`CourseId`, `Title`, `EntryAuthor`, `Review`, `Stars`, …)
+- Domain events (`ReviewEntryCreatedEvent`, …)
+- Domain services (`ReviewEntryCreationService`)
+- Repository interfaces (`ReviewEntryRepository`, `CourseReviewRepository`)
+
+Package-private visibility enforces domain isolation: only code in the same package (across Maven modules sharing that package) can access these types directly. Sub-packages (e.g., `api`, `api.mapper`) cannot.
+
+### Commands as the Public Boundary
+
+**Commands are `public`** because they are the glue between the outside world (REST APIs, AMQP listeners) and the internal domain. Rules:
+
+- Command class and its constructor are `public`.
+- **Constructor parameters** are primitive types (`String`, `int`, …) or public DTOs defined in the application module.
+- **Fields** (via `@Getter`) are domain value objects or entities — package-private types are fine here since command handlers live in the same package.
+
+Example:
+```java
+public class CreateReviewEntryCommand extends DefaultDomainCommand {
+    private final EntryAuthor author;   // domain value object (package-private type)
+    private final CourseId courseId;    // domain value object (package-private type)
+
+    public CreateReviewEntryCommand(String userName, String courseId, ...) { ... }
+}
+```
+
+### REST Layer Structure
+
+- **Controllers** are placed in the `.api` sub-package (e.g., `io.twba.rating_system.api`).
+- **Request DTOs** are standalone `@Data` classes in the `.api` sub-package — never static inner classes of the controller.
+- **Mappers** (implementing `RequestMapper<REQUEST>`) are placed in the `.api.mapper` sub-package.
+- A `RequestMappers` aggregator component in `.api.mapper` collects all `RequestMapper` beans and dispatches by request class.
+- Each mapper converts a request DTO to a **public** command, calling the command's public constructor with primitives extracted from the DTO.
+- Controller tests use `MockMvcBuilders.standaloneSetup` with real mappers and a mocked `CommandBus`, and are placed in the base domain package (e.g., `io.twba.rating_system`) so they can access package-private value objects for assertions.
+
 ## Key Dependencies
 
 Spring Boot 3.5.10, Debezium 3.4.1.Final, PostgreSQL 16 (logical decoding), RabbitMQ 3.13.1, Flyway 11.20.3, Hypersistence Utils, Lombok, Jackson

@@ -1,7 +1,9 @@
 package io.twba.rating_system;
 
+import java.util.Optional;
+
 interface ReviewEntryRepository {
 
     void save(ReviewEntry reviewEntry);
-    ReviewEntry retrieveEntry(ReviewEntryId reviewEntryId);
+    Optional<ReviewEntry> retrieveReviewEntryFor(EntryAuthor author, CourseId courseId);
 }

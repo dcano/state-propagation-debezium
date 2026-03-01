@@ -31,7 +31,7 @@ class ReviewEntryCreatedEvent extends DomainEventPayload {
         this.createdTime = entryCreationTime;
         this.updatedTime = entryUpdateTime;
         this.review = review;
-        this.title = title.toString();
+        this.title = title.value();
     }
 
     @Override
