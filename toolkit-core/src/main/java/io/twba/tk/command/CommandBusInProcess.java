@@ -28,6 +28,15 @@ public class CommandBusInProcess implements CommandBus {
 
     }
 
+    public CommandBusInProcess(List<CommandHandler<? extends DomainCommand>> commandHandlers, TwbaTransactionManager transactionManager) {
+        domainEventAppender = null;
+        handlersMap = new HashMap<>();
+        if(commandHandlers != null) {
+            commandHandlers.forEach(handler -> handlersMap.put(handler.handles(), new TransactionalCommandHandlerDecorator(handler, transactionManager)));
+        }
+
+    }
+
     @Override
     public <T extends DomainCommand> void push(T command) {
         if(handlersMap.containsKey(command.getClass().getName())) {
