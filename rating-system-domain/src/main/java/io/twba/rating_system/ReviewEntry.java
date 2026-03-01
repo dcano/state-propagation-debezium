@@ -97,6 +97,11 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
 
     @Override
     public Optional<ReviewEntry> hydrateFrom(List<Event<DomainEventPayload>> events) {
+
+        if(Objects.isNull(events) || events.isEmpty()) {
+            return Optional.empty();
+        }
+
         return Optional.of(events.stream().reduce(new ReviewEntry((long) events.size()), (reviewEntry, domainEventPayloadEvent) -> {
 
             if (domainEventPayloadEvent.getPayload() instanceof ReviewEntryCreatedEvent event) {
