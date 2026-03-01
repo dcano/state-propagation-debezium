@@ -225,6 +225,91 @@ The `event_stream_version` header records each event's position within the aggre
 
 ---
 
+## The Event Store as a CDC Stream
+
+An append-only, version-ordered table is structurally identical to a Change Data Capture stream. Every row is an immutable fact with a position (`event_stream_version`). No rows are ever updated or deleted. This makes the event store a natural source for CDC tooling — any new event appended by the write model can be captured and forwarded downstream without polling.
+
+PostgreSQL exposes this through its Write-Ahead Log (WAL). With logical decoding enabled, a tool like Debezium can tail any table in real time and emit each `INSERT` as it is committed. Because the event store is append-only by design, there are no updates or deletes to filter out — every WAL entry is a new domain event.
+
+This project applies the principle to the **Transactional Outbox**. The `CourseManagement` service persists domain events atomically alongside its aggregate writes into an outbox table. Debezium tails that table using the `pgoutput` logical decoding plugin, and a dedicated relay service forwards each captured record to RabbitMQ as a CloudEvent:
+
+```
+CourseManagement writes atomically:
+  ┌─────────────────────────────────────────────┐
+  │  BEGIN TRANSACTION                           │
+  │    UPDATE domain_table ...                   │
+  │    INSERT INTO outbox_schema.outbox (...)    │  ← append-only
+  │  COMMIT                                      │
+  └─────────────────────────────────────────────┘
+            │
+            ▼ PostgreSQL WAL (logical decoding / pgoutput)
+            │
+  ┌─────────────────────────────────────────────┐
+  │  DebeziumMessageRelay (embedded engine)      │
+  │    .skipped.operations = "u,d,t"             │  ← only INSERTs
+  │    .table.include.list = outbox_schema.outbox│
+  └─────────────────────────────────────────────┘
+            │
+            ▼
+  CloudEventRecordChangeConsumer
+    → wraps record in CloudEvents 3.0 envelope
+    → MessagePublisherRabbitMq → RabbitMQ exchange
+```
+
+The relay service is a thin Spring Boot application. It configures the embedded Debezium engine with the outbox table as its target and a `CloudEventRecordChangeConsumer` as the change handler:
+
+```java
+// DebeziumConfiguration.java
+@Bean
+public MessageRelay debeziumMessageRelay(DebeziumProperties debeziumProperties,
+                                         CdcRecordChangeConsumer cdcRecordChangeConsumer) {
+    return new DebeziumMessageRelay(debeziumProperties, cdcRecordChangeConsumer);
+}
+
+@Bean
+public CdcRecordChangeConsumer cdcRecordChangeConsumer(MessagePublisher messagePublisher) {
+    return new CloudEventRecordChangeConsumer(messagePublisher);
+}
+```
+
+On each captured `INSERT`, the consumer reads the outbox record fields, constructs a CloudEvent, and publishes it to RabbitMQ:
+
+```java
+// CloudEventRecordChangeConsumer.java
+@Override
+public void accept(CdcRecord cdcRecord) {
+    CloudEvent event = new CloudEventBuilder()
+        .withId(cdcRecord.valueOf("uuid"))
+        .withType(cdcRecord.valueOf("type"))
+        .withSubject(cdcRecord.valueOf("aggregate_id"))
+        .withExtension(CLOUD_EVENT_PARTITION_KEY, cdcRecord.valueOf("partition_key"))
+        .withExtension(CLOUD_EVENT_CORRELATION_ID, cdcRecord.valueOf("correlation_id"))
+        .withData("application/json", cdcRecord.<String>valueOf("payload").getBytes(UTF_8))
+        .build();
+
+    messagePublisher.publish(event);
+}
+```
+
+The Debezium configuration tells the engine to skip updates, deletes, and truncations — it only processes `INSERT` operations, which is the entire contract of an append-only outbox:
+
+```yaml
+# application.yaml (state-propagation service)
+debezium:
+  connector-class: "io.debezium.connector.postgresql.PostgresConnector"
+  custom-props:
+    "[plugin.name]": "pgoutput"
+  source-database-properties:
+    outbox-table: "${CDC_OUTBOX_TABLE:outbox_schema.outbox}"
+  # skipped.operations: "u,d,t" configured in DebeziumConfigurationProvider
+```
+
+The same approach applies directly to the event store. Because `event_sourcing_schema.event_store` is also append-only and version-ordered, Debezium could tail it just as effectively. Any service that needs to react to `ReviewEntry` state changes — for example, to update a search index or send a notification — could subscribe to that WAL stream without the `ReviewEntry` aggregate knowing anything about its consumers.
+
+This is where event sourcing and event-driven architecture meet, without being the same thing. The event store is a persistence mechanism. The CDC layer turns it into a broadcast channel. Each concern remains independently replaceable.
+
+---
+
 ## Myth 3: "Storing Every Change Forever Will Kill Performance"
 
 **The Myth:** "Storing every change will exhaust disk space and make hydration too slow to be practical."
