@@ -64,14 +64,6 @@ public class UpdateReviewEntryTitleCommandHandlerTest {
     }
 
     private ReviewEntry existingReviewEntry(EntryAuthor author, CourseId courseId, String title) {
-        ReviewEntryCreatedEvent createdEvent = new ReviewEntryCreatedEvent(
-                new ReviewEntryId(UUID.randomUUID().toString()),
-                Instant.now(),
-                Instant.now(),
-                author,
-                new Review(Stars.TWO, "Some comment"),
-                courseId,
-                new Title(title));
-        return ReviewEntry.from(List.of(new Event<>(createdEvent)));
+        return ReviewEntry.instance(new ReviewEntryId(UUID.randomUUID().toString()), Instant.now(), Instant.now(), author, new Review(Stars.TWO, "Some comment"), courseId, new Title(title), null);
     }
 }

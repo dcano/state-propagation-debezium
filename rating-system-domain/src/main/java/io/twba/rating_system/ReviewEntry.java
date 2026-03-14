@@ -1,20 +1,17 @@
 package io.twba.rating_system;
 
-import io.twba.tk.core.DomainEventPayload;
 import io.twba.tk.core.Entity;
-import io.twba.tk.core.Event;
-import io.twba.tk.eventsource.EventSourced;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Getter(AccessLevel.PACKAGE)
-class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
+@Setter(AccessLevel.PACKAGE)
+class ReviewEntry extends Entity {
 
     private ReviewEntryId reviewEntryId;
     private Instant entryCreationTime;
@@ -24,7 +21,7 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
     private CourseId courseId;
     private Title title;
 
-    private ReviewEntry(Long version) {
+    ReviewEntry(Long version) {
         super(version);
     }
 
@@ -66,10 +63,6 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
         }
     }
 
-    static ReviewEntry from(List<Event<DomainEventPayload>> events) {
-        return new ReviewEntry((long)events.size()).hydrateFrom(events).orElseThrow(() -> new RuntimeException("Failed to hydrate review entry"));
-    }
-
     static ReviewEntry createNew(EntryAuthor author, Review review, CourseId courseId, Title title, ReviewEntryCreationService reviewEntryCreationService) {
 
         if(reviewEntryCreationService.existsForAuthorAndCourse(author, courseId)) {
@@ -95,32 +88,7 @@ class ReviewEntry extends Entity implements EventSourced<ReviewEntry> {
         return reviewEntry;
     }
 
-    @Override
-    public Optional<ReviewEntry> hydrateFrom(List<Event<DomainEventPayload>> events) {
-
-        if(Objects.isNull(events) || events.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(events.stream().reduce(new ReviewEntry((long) events.size()), (reviewEntry, domainEventPayloadEvent) -> {
-
-            if (domainEventPayloadEvent.getPayload() instanceof ReviewEntryCreatedEvent event) {
-                reviewEntry.courseId = new CourseId(event.getCourseId());
-                reviewEntry.reviewEntryId = new ReviewEntryId(event.getReviewEntryId());
-                reviewEntry.title = new Title(event.getTitle());
-                reviewEntry.author = new EntryAuthor(event.getAuthor());
-                reviewEntry.entryCreationTime = event.getCreatedTime();
-                reviewEntry.entryUpdateTime = event.getUpdatedTime();
-                reviewEntry.review = event.getReview();
-            } else if(domainEventPayloadEvent.getPayload() instanceof ReviewEntryTitleUpdatedEvent event) {
-                reviewEntry.title = new Title(event.getTitle());
-                reviewEntry.entryUpdateTime = event.getUpdatedAt();
-            } else if(domainEventPayloadEvent.getPayload() instanceof ReviewUpdatedEvent event) {
-                reviewEntry.review = new Review(event.getReview().stars(), event.getReview().comment());
-                reviewEntry.entryUpdateTime = event.getUpdatedAt();
-            }
-
-            return  reviewEntry;
-        }, (courseReview, courseReview2) -> courseReview2));
+    static ReviewEntry instance(ReviewEntryId reviewEntryId, Instant entryCreationTime, Instant entryUpdateTime, EntryAuthor author, Review review, CourseId courseId, Title title, Long version) {
+        return new ReviewEntry(reviewEntryId, entryCreationTime, entryUpdateTime, author, review, courseId, title, version);
     }
 }

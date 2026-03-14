@@ -144,14 +144,6 @@ class ReviewEntryTest {
     }
 
     private ReviewEntry existingEntry() {
-        ReviewEntryCreatedEvent createdEvent = new ReviewEntryCreatedEvent(
-                new ReviewEntryId(UUID.randomUUID().toString()),
-                Instant.now(),
-                Instant.now(),
-                author,
-                review,
-                courseId,
-                title);
-        return ReviewEntry.from(List.of(new Event<>(createdEvent)));
+        return ReviewEntry.instance(new ReviewEntryId(UUID.randomUUID().toString()), Instant.now(), Instant.now(), author, review, courseId, title, 2L);
     }
 }
