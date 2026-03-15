@@ -36,7 +36,6 @@ import java.util.List;
 @EnableConfigurationProperties
 @EnableRabbit
 @ComponentScan(basePackages = {
-        "io.twba.tk.aspects",
         "io.twba.tk.autoconfigure"
 })
 @Configuration
