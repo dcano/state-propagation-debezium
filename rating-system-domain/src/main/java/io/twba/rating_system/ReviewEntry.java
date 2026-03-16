@@ -63,7 +63,11 @@ class ReviewEntry extends Entity {
         }
     }
 
-    static ReviewEntry createNew(EntryAuthor author, Review review, CourseId courseId, Title title, ReviewEntryCreationService reviewEntryCreationService) {
+    static ReviewEntry createNew(EntryAuthor author,
+                                 Review review,
+                                 CourseId courseId,
+                                 Title title,
+                                 ReviewEntryCreationService reviewEntryCreationService) {
 
         if(reviewEntryCreationService.existsForAuthorAndCourse(author, courseId)) {
             throw new ReviewEntryAlreadyExistsForCourseAndUser(courseId, author);
