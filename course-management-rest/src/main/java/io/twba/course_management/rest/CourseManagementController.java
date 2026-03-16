@@ -1,13 +1,22 @@
 package io.twba.course_management.rest;
 
 import io.twba.course_management.CourseView;
+import io.twba.course_management.DeleteCourseDefinitionCommand;
 import io.twba.course_management.rest.mapper.CourseManagementRequestMappers;
+import io.twba.course_management.rest.mapper.CreateCourseDefinitionRequestMapper;
 import io.twba.tk.command.CommandBus;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("twba")
@@ -32,6 +41,13 @@ public class CourseManagementController {
         commandBus.push(command);
     }
 
+
+    @DeleteMapping(value = "/course/{courseId}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void deleteCourse(@PathVariable("courseId") String courseId) {
+        var command = new DeleteCourseDefinitionCommand(courseId, CreateCourseDefinitionRequestMapper.TENANT_ID);
+        commandBus.push(command);
+    }
 
     @PreAuthorize("hasAuthority('READ')")
     @GetMapping(value = "/course/{courseId}")

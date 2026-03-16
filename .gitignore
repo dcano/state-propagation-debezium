@@ -48,3 +48,6 @@ hsperfdata_root/
 
 .temp
 /.certs/
+
+*.local.*
+*-local-*

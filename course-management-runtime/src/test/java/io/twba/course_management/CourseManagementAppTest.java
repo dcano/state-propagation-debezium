@@ -18,11 +18,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Testcontainers
 @ContextConfiguration(classes = {CourseManagementApp.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles({"postgres, unsafe"})
+@ActiveProfiles({"postgres", "unsafe"})
 public class CourseManagementAppTest {
 
     @Container
-    public static PostgreSQLContainer container = new PostgreSQLContainer("postgres:latest")
+    public static PostgreSQLContainer<?> container = new PostgreSQLContainer("postgres:latest")
             .withDatabaseName("courses_db")
             .withUsername("sa")
             .withPassword("sa");
