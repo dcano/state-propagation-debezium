@@ -91,6 +91,22 @@ The project follows a modular, hexagonal architecture pattern with three microse
    - Tails the outbox table using Debezium CDC
    - Publishes Cloud Events to RabbitMQ
 
+### Domain isolation
+
+- Use package private for all the domain classes (aggregates, value objects, ports, etc)
+- Glue between the domain and the external (driver) adapters are the commands:
+    - Commands has primitive types or publicly accessible DTOs in the constructor.
+    - Internal command properties are package private using domain classes.
+    - Command handlers are always package private.
+
+### Architecture checks
+
+- It is not allowed to call the domain from driver adapters (e.g. REST APIs) - Use always commands or queries executed via command bus / query bus.
+- It is not allowed to call the repository form the domain aggregates / entities.
+- Value objects must perform its own checks.
+- It is not allowed direct inter service calls (Domain Isolation must prevent this from happening)
+- When calling an external service, use always a port defined in the domain.
+
 ### Module Categories
 
 **Toolkit Modules** (reusable infrastructure):
